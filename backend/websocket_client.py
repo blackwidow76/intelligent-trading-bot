@@ -54,13 +54,15 @@ async def pump_fun_client():
             await process_data(data)
 
 async def store_new_token_mint_data(data):
-    new_token = Token()
-    if 'contract_address' in data:
-        new_token.contract_address = data['contract_address']
-    else:
-        logger.error("Missing 'contract_address' key in data")
-    db.session.add(new_token)
-    db.session.commit()
+    from app import app  # Import the app instance
+    with app.app_context():  # Push the application context
+        new_token = Token()
+        if 'contract_address' in data:
+            new_token.contract_address = data['contract_address']
+        else:
+            logger.error("Missing 'contract_address' key in data")
+        db.session.add(new_token)
+        db.session.commit()
 
 async def fetch_and_store_token_metadata(contract_address):
     # Assuming fetch_token_metadata is defined in pumpportal/pumpportal_client.py
