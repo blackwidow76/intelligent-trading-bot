@@ -46,6 +46,13 @@ async def subscribe_to_streams(websocket):
     }
     await websocket.send(json.dumps(payload))
 
+    # Subscribe to MEV Bot transactions
+    payload = {
+        "method": "subscribeMEVBotTransaction",
+        "keys": ["MEVBotPublicKey"]  # Public key of the MEV Bot
+    }
+    await websocket.send(json.dumps(payload))
+
 # Call the function within an async context
 async def main():
     async with websockets.connect(uri) as websocket:
