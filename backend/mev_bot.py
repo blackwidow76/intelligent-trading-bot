@@ -11,18 +11,22 @@ class MEVBot:
         self.bitquery_client = bitquery_client
 
     async def update_gas_and_tip(self, transaction):
-        # Logic to update gas and tip dynamically
-        pass
+        # Logic to update gas and tip dynamically based on current market conditions
+        current_gas_price = await self.solana_client.get_gas_price()
+        current_tip = await self.bitquery_client.get_current_tip()
+        transaction['gas_price'] = current_gas_price
+        transaction['tip'] = current_tip
 
     async def check_profitability(self, transaction):
         # Logic to check if the transaction is profitable
-        pass
+        estimated_profit = await self.bitquery_client.estimate_profit(transaction)
+        return estimated_profit > transaction['gas_price'] + transaction['tip']
 
     async def execute_transaction(self, transaction):
         await self.update_gas_and_tip(transaction)
         if await self.check_profitability(transaction):
             # Execute the transaction
-            pass
+            await self.solana_client.send_transaction(transaction)
         else:
             # Revert the transaction
-            pass
+            logger.info("Transaction not profitable, reverting.")
