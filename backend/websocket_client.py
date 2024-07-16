@@ -45,31 +45,31 @@ async def pump_fun_client():
             logger.info(f"Received data: {data}")
 from backend.models import db, Token, Trade
 
-                    async def store_new_token_data(data):
-                        new_token = Token(
-                            name=data['name'],
-                            symbol=data['symbol'],
-                            launch_date=data['launch_date'],
-                            price=data['price'],
-                            volume=data['volume']
-                        )
-                        db.session.add(new_token)
-                        await db.session.commit()
+            async def store_new_token_data(data):
+                new_token = Token(
+                    name=data['name'],
+                    symbol=data['symbol'],
+                    launch_date=data['launch_date'],
+                    price=data['price'],
+                    volume=data['volume']
+                )
+                db.session.add(new_token)
+                await db.session.commit()
 
-                    async def store_trade_data(data):
-                        new_trade = Trade(
-                            token_id=data['token_id'],
-                            trade_time=data['trade_time'],
-                            amount=data['amount'],
-                            price=data['price']
-                        )
-                        db.session.add(new_trade)
-                        await db.session.commit()
-                    # Store relevant information in the database
-                    if data.get('event') == 'newToken':
-                        await store_new_token_data(data)
-                    elif data.get('event') == 'trade':
-                        await store_trade_data(data)
+            async def store_trade_data(data):
+                new_trade = Trade(
+                    token_id=data['token_id'],
+                    trade_time=data['trade_time'],
+                    amount=data['amount'],
+                    price=data['price']
+                )
+                db.session.add(new_trade)
+                await db.session.commit()
+            # Store relevant information in the database
+            if data.get('event') == 'newToken':
+                await store_new_token_data(data)
+            elif data.get('event') == 'trade':
+                await store_trade_data(data)
         except websockets.exceptions.ConnectionClosed:
             logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
             await asyncio.sleep(5)
