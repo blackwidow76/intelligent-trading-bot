@@ -14,6 +14,12 @@ logger = logging.getLogger(__name__)
 socketio = SocketIO()
 
 # WebSocket client to connect to Pump.fun
+import os
+import sys
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from shared.websocket_client import WebSocketClient
 
 async def pump_fun_client():
