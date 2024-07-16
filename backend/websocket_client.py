@@ -14,10 +14,12 @@ logger = logging.getLogger(__name__)
 socketio = SocketIO()
 
 # WebSocket client to connect to Pump.fun
+from shared.websocket_client import WebSocketClient
+
 async def pump_fun_client():
     uri = "wss://pumpportal.fun/api/data"
     logger.info("Starting Pump.fun WebSocket client")
-    async with websockets.client.connect(uri) as websocket:  # Use websockets.client.connect
+    async with WebSocketClient(uri) as websocket:
         logger.info("Connected to Pump.fun WebSocket")
         
         # Subscribing to token creation events
