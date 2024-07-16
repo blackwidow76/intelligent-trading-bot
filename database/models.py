@@ -24,3 +24,14 @@ class TokenMetadata(Base):
     total_supply = Column(String)
 
     token = relationship("Token", back_populates="metadata")
+
+class Trade(Base):
+    __tablename__ = "trades"
+
+    id = Column(Integer, primary_key=True, index=True)
+    token_id = Column(Integer, ForeignKey("tokens.id"))
+    trade_time = Column(DateTime)
+    amount = Column(Float)
+    price = Column(Float)
+
+    token = relationship("Token", back_populates="trades")
