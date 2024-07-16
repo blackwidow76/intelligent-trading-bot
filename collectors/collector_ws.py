@@ -8,10 +8,10 @@ import time
 import pandas as pd
 import asyncio
 
-from binance.exceptions import *
-from binance.helpers import date_to_milliseconds, interval_to_milliseconds
-from binance.client import Client
-from binance.websockets import BinanceSocketManager
+import asyncio
+import websockets
+import json
+from solana.rpc.api import Client as SolanaClient
 
 from common.utils import *
 from service.App import *
@@ -36,6 +36,13 @@ async def subscribe_to_streams(websocket):
     payload = {
         "method": "subscribeTokenTrade",
         "keys": ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"]  # array of token CAs to watch
+    }
+    await websocket.send(json.dumps(payload))
+
+    # Subscribe to account trade events
+    payload = {
+        "method": "subscribeAccountTrade",
+        "keys": ["AArPXm8JatJiuyEffuC1un2Sc835SULa4uQqDcaGpAjV"]  # array of accounts to watch
     }
     await websocket.send(json.dumps(payload))
 

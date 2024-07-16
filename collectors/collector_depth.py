@@ -14,9 +14,9 @@ import asyncio
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from binance.exceptions import *
-from binance.helpers import date_to_milliseconds, interval_to_milliseconds
-from binance.client import Client
+import requests
+from solana.rpc.api import Client as SolanaClient
+from bitquery import Bitquery
 
 from common.utils import *
 from service.App import *
@@ -97,7 +97,7 @@ async def main_collector_depth_task():
 
 
 async def request_depth(symbol, freq, limit):
-    """Request order book data from the service for one symbol."""
+    """Request order book data from Bitquery for one symbol."""
     requestTime = now_timestamp()
 
     depth = {}
@@ -106,21 +106,11 @@ async def request_depth(symbol, freq, limit):
         return depth
 
     try:
-        depth = App.client.get_order_book(symbol=symbol, limit=limit)  # <100 weight=1
-    except BinanceRequestException as bre:
-        # {"code": 1103, "msg": "An unknown parameter was sent"}
-        try:
-            depth['code'] = bre.code
-            depth['msg'] = bre.msg
-        except:
-            pass
-    except BinanceAPIException as bae:
-        # {"code": 1002, "msg": "Invalid API call"}
-        try:
-            depth['code'] = bae.code
-            depth['msg'] = bae.message
-        except:
-            pass
+        query = Bitquery.get_order_book_query(symbol, limit)
+        response = requests.post(Bitquery.API_URL, json=query)
+        depth = response.json()
+    except Exception as e:
+        log.error(f"Error fetching order book data from Bitquery: {str(e)}")
 
     responseTime = now_timestamp()
 
