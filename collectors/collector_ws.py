@@ -58,6 +58,12 @@ async def subscribe_to_streams(websocket):
     }
     await websocket.send(json.dumps(payload))
 
+    # Subscribe to create transaction events
+    payload = {
+        "method": "subscribeCreateTransaction",
+    }
+    await websocket.send(json.dumps(payload))
+
 # Call the function within an async context
 async def main():
     async with websockets.connect(uri) as websocket:

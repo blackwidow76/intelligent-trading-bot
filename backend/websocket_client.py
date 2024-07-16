@@ -76,7 +76,7 @@ async def store_trade_data(data):
 
 async def process_data(data):
     try:
-        if data.get('event') == 'newTokenMint':
+        if data.get('txType') == 'create':
             await store_new_token_mint_data(data)
         elif data.get('event') == 'trade':
             await store_trade_data(data)
