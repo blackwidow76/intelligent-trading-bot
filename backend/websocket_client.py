@@ -46,32 +46,6 @@ async def pump_fun_client():
             logger.info(f"Received data: {data}")
             await process_data(data)
 
-async def store_new_token_mint_data(data):
-    new_token = Token()
-    new_token.contract_address = data['contract_address']
-    db.session.add(new_token)
-    db.session.commit()
-
-async def fetch_and_store_token_metadata(contract_address):
-    metadata = await fetch_token_metadata(contract_address)
-    token = Token.query.filter_by(contract_address=contract_address).first()
-    if token:
-        token.name = metadata['name']
-        token.symbol = metadata['symbol']
-        token.launch_date = metadata['launch_date']
-        token.price = metadata['price']
-        token.volume = metadata['volume']
-        db.session.commit()
-
-async def store_trade_data(data):
-    new_trade = Trade(
-        token_id=data['token_id'],
-        trade_time=data['trade_time'],
-        amount=data['amount'],
-        price=data['price']
-    )
-    db.session.add(new_trade)
-    db.session.commit()
 
 async def process_data(data):
     try:
