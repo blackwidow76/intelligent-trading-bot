@@ -76,7 +76,8 @@ def add_user():
 if __name__ == '__main__':
     logger.info("Initializing Flask app")
     # Add testing logic here
-    from tests import test_pumpfun_integration, test_jito_integration
+    from tests.test_pumpfun_integration import test_pumpfun_integration
+    from tests.test_jito_integration import test_jito_integration
     test_pumpfun_integration()
     test_jito_integration()
     try:
