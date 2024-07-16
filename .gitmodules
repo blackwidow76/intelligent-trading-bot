@@ -1,0 +1,3 @@
+[submodule "vjito-python"]
+	path = vjito-python
+	url = https://github.com/jito-labs/jito-python.git
