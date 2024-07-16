@@ -52,6 +52,8 @@ async def store_new_token_mint_data(data):
     db.session.commit()
 
 async def fetch_and_store_token_metadata(contract_address):
+    # Assuming fetch_token_metadata is defined in pumpportal/pumpportal_client.py
+    from pumpportal.pumpportal_client import fetch_token_metadata
     metadata = await fetch_token_metadata(contract_address)
     token = Token.query.filter_by(contract_address=contract_address).first()
     if token:
@@ -79,6 +81,9 @@ async def process_data(data):
         elif data.get('event') == 'trade':
             await store_trade_data(data)
         elif data.get('event') == 'mevBotTransaction':
+            # Assuming mev_bot is defined in backend/mev_bot.py
+            from backend.mev_bot import MEVBot
+            mev_bot = MEVBot(solana_client, bitquery_client)  # Assuming these clients are initialized somewhere
             await mev_bot.execute_transaction(data)
     except websockets.exceptions.ConnectionClosed:
         logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
