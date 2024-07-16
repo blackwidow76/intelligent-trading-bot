@@ -45,15 +45,22 @@ async def pump_fun_client():
             logger.info(f"Received data: {data}")
             await process_data(data)
 
-async def store_new_token_data(data):
+async def store_new_token_mint_data(data):
     new_token = Token()
-    new_token.name = data['name']
-    new_token.symbol = data['symbol']
-    new_token.launch_date = data['launch_date']
-    new_token.price = data['price']  # Ensure this line matches the model
-    new_token.volume = data['volume']
+    new_token.contract_address = data['contract_address']
     db.session.add(new_token)
     db.session.commit()
+
+async def fetch_and_store_token_metadata(contract_address):
+    metadata = await fetch_token_metadata(contract_address)
+    token = Token.query.filter_by(contract_address=contract_address).first()
+    if token:
+        token.name = metadata['name']
+        token.symbol = metadata['symbol']
+        token.launch_date = metadata['launch_date']
+        token.price = metadata['price']
+        token.volume = metadata['volume']
+        db.session.commit()
 
 async def store_trade_data(data):
     new_trade = Trade(
@@ -67,8 +74,8 @@ async def store_trade_data(data):
 
 async def process_data(data):
     try:
-        if data.get('event') == 'newToken':
-            await store_new_token_data(data)
+        if data.get('event') == 'newTokenMint':
+            await store_new_token_mint_data(data)
         elif data.get('event') == 'trade':
             await store_trade_data(data)
         elif data.get('event') == 'mevBotTransaction':
