@@ -12,7 +12,7 @@ class Token(Base):
     contract_address = Column(String, unique=True, index=True)
     creation_time = Column(DateTime)
 
-    metadata = relationship("TokenMetadata", back_populates="token", uselist=False)
+    token_metadata = relationship("TokenMetadata", back_populates="token", uselist=False)
 
 class TokenMetadata(Base):
     __tablename__ = "token_metadata"
