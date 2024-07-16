@@ -22,6 +22,9 @@ class SolanaTrader:
     import requests
     import json
 
+    import requests
+    import json
+
     async def submit_swap_transaction(self, transaction):
         # Optimize transaction construction and submission
         from utils import optimize_transaction
