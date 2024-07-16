@@ -1,11 +1,12 @@
 import asyncio
-import websockets
+import websockets.client  # Ensure correct import
 import json
 import logging
 from flask_socketio import SocketIO
 from .config import Config
 from backend.models import db, Token
 from database.models import Trade  # Adjusted import path
+from pumpportal.pumpportal_client import fetch_token_metadata  # Ensure correct import path
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -17,7 +18,7 @@ socketio = SocketIO()
 async def pump_fun_client():
     uri = "wss://pumpportal.fun/api/data"
     logger.info("Starting Pump.fun WebSocket client")
-    async with websockets.connect(uri) as websocket:
+    async with websockets.client.connect(uri) as websocket:  # Use websockets.client.connect
         logger.info("Connected to Pump.fun WebSocket")
         
         # Subscribing to token creation events
@@ -52,8 +53,6 @@ async def store_new_token_mint_data(data):
     db.session.commit()
 
 async def fetch_and_store_token_metadata(contract_address):
-    # Assuming fetch_token_metadata is defined in pumpportal/pumpportal_client.py
-    from pumpportal.pumpportal_client import fetch_token_metadata
     metadata = await fetch_token_metadata(contract_address)
     token = Token.query.filter_by(contract_address=contract_address).first()
     if token:
