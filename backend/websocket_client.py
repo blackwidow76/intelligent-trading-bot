@@ -23,23 +23,20 @@ async def pump_fun_client():
                     message = await websocket.recv()
                     data = json.loads(message)
                     # Process and emit the data to connected clients
-                    from backend.handlers import handle_new_token_event, handle_trade_event
-
                     if data.get('event') == 'newToken':
-                        await handle_new_token_event(data)
                         logger.info(f"Received new token data: {data}")
                     elif data.get('event') == 'trade':
-                        await handle_trade_event(data)
                         logger.info(f"Received trade data: {data}")
                     from backend.models import db, Token, Trade
 
                     async def store_new_token_data(data):
-                        new_token = Token()
-                        new_token.name = data['name']
-                        new_token.symbol = data['symbol']
-                        new_token.launch_date = data['launch_date']
-                        new_token.price = data['price']
-                        new_token.volume = data['volume']
+                        new_token = Token(
+                            name=data['name'],
+                            symbol=data['symbol'],
+                            launch_date=data['launch_date'],
+                            price=data['price'],
+                            volume=data['volume']
+                        )
                         db.session.add(new_token)
                         await db.session.commit()
 
