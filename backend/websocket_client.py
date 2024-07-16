@@ -31,11 +31,18 @@ async def pump_fun_client():
                     elif data.get('event') == 'trade':
                         await handle_trade_event(data)
                         logger.info(f"Received trade data: {data}")
-                    # Additional logic to parse and store data
+                    async def store_new_token_data(data):
+                        # Implement logic to store new token data in the database
+                        pass
+
+                    async def store_trade_data(data):
+                        # Implement logic to store trade data in the database
+                        pass
+                    # Store relevant information in the database
                     if data.get('event') == 'newToken':
-                        await handle_new_token_event(data)
+                        await store_new_token_data(data)
                     elif data.get('event') == 'trade':
-                        await handle_trade_event(data)
+                        await store_trade_data(data)
         except websockets.exceptions.ConnectionClosed:
             logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
             await asyncio.sleep(5)
