@@ -43,7 +43,7 @@ async def pump_fun_client():
         async for message in websocket:
             data = json.loads(message)
             logger.info(f"Received data: {data}")
-                    from backend.models import db, Token, Trade
+from backend.models import db, Token, Trade
 
                     async def store_new_token_data(data):
                         new_token = Token(
