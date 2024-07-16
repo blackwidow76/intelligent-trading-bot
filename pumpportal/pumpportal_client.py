@@ -31,13 +31,18 @@ class PumpPortalClient:
             async for message in websocket:
                 event = json.loads(message)
                 if event.get("event") == "newToken":
-                    token_metadata = await self.get_token_metadata(event["contractAddress"])
+                    contract_address = event["contractAddress"]
+                    token_metadata_url = f"{self.token_metadata_url}/{contract_address}"
+                    token_metadata = await self.fetch_token_metadata(token_metadata_url)
                     await self.store_token_data(event, token_metadata)
                     yield {"event": event, "metadata": token_metadata}
 
-    async def get_token_metadata(self, contract_address):
-        response = requests.get(f"{self.token_metadata_url}/{contract_address}")
-        return response.json()
+    async def fetch_token_metadata(self, token_metadata_url):
+        response = requests.get(token_metadata_url)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return {"error": "Failed to fetch token metadata"}
 
     async def store_token_data(self, event, metadata):
         db = SessionLocal()
