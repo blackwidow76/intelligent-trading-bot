@@ -1,6 +1,12 @@
-import os
 import sys
-import argparse
+import os
+
+# Add the grandparent directory to the Python path
+path_to_add = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, path_to_add)
+print('Added path:', path_to_add)
+
+from common.utils import *
 import math, time
 from datetime import datetime
 import pandas as pd
@@ -52,14 +58,18 @@ async def main_collector_depth_task():
             res = await fut
             results.append(res)
             try:
-                # Add to the database
-                added_count = App.analyzer.store_depth([res], freq)
+                # Ensure App.analyzer is not None
+                if App.analyzer is not None:
+                    # Add to the database
+                    added_count = App.analyzer.store_depth([res], freq)
+                else:
+                    log.error("App.analyzer is not initialized.")
             except Exception as e:
-                log.error(f"Error storing order book resultin the database.")
+                log.error(f"Error storing order book result in the database: {str(e)}")
         except TimeoutError as te:
             log.warning(f"Timeout {timeout} seconds when requesting order book data.")
         except Exception as e:
-            log.warning(f"Exception when requesting order book data.")
+            log.warning(f"Exception when requesting order book data: {str(e)}")
 
     """
     # Process the results after all responses are received
@@ -91,6 +101,10 @@ async def request_depth(symbol, freq, limit):
     requestTime = now_timestamp()
 
     depth = {}
+    if App.client is None:
+        log.error("App.client is not initialized.")
+        return depth
+
     try:
         depth = App.client.get_order_book(symbol=symbol, limit=limit)  # <100 weight=1
     except BinanceRequestException as bre:
@@ -105,7 +119,6 @@ async def request_depth(symbol, freq, limit):
         try:
             depth['code'] = bae.code
             depth['msg'] = bae.message
-            # depth['msg'] = bae.msg  # Does not exist
         except:
             pass
 

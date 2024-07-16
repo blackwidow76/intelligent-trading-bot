@@ -26,17 +26,23 @@ log = logging.getLogger('collector_ws')
 #
 
 # Subscribe to new token events
-payload = {
-    "method": "subscribeNewToken",
-}
-await websocket.send(json.dumps(payload))
+async def subscribe_to_streams(websocket):
+    payload = {
+        "method": "subscribeNewToken",
+    }
+    await websocket.send(json.dumps(payload))
 
-# Subscribe to trade events
-payload = {
-    "method": "subscribeTokenTrade",
-    "keys": ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"]  # array of token CAs to watch
-}
-await websocket.send(json.dumps(payload))
+    # Subscribe to trade events
+    payload = {
+        "method": "subscribeTokenTrade",
+        "keys": ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"]  # array of token CAs to watch
+    }
+    await websocket.send(json.dumps(payload))
+
+# Call the function within an async context
+async def main():
+    async with websockets.connect(uri) as websocket:
+        await subscribe_to_streams(websocket)
 #  Create event queue for processing incoming events. Writings to one file must be sequential - not in parallel.
 #    But writes in different files can be independent tasks.
 #    How to ensure sequential tasks? Essentially, incoming events are not allowed to overlap somewhere down the pipeline (at the end).
