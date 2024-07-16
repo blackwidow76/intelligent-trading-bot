@@ -45,33 +45,6 @@ with app.app_context():
 def home():
     return jsonify({"message": "Welcome to the Pump.fun API"})
 
-@app.route("/tokens", methods=["GET"])
-def get_tokens():
-    tokens = Token.query.all()
-    return jsonify([{"id": token.id, "name": token.name, "symbol": token.symbol, "launch_date": token.launch_date} for token in tokens])
-
-@app.route("/tokens", methods=["POST"])
-def add_token():
-    data = request.get_json()
-    new_token = Token(name=data['name'], symbol=data['symbol'], launch_date=data['launch_date'], price=data['price'], volume=data['volume'])
-    db.session.add(new_token)
-    db.session.commit()
-    return jsonify({"message": "Token added successfully"}), 201
-
-@app.route("/users", methods=["GET"])
-def get_users():
-    users = User.query.all()
-    return jsonify([{"id": user.id, "username": user.username, "email": user.email} for user in users])
-
-@app.route("/users", methods=["POST"])
-def add_user():
-    data = request.get_json()
-    new_user = User()
-    new_user.username = data['username']
-    new_user.email = data['email']
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"message": "User added successfully"}), 201
 
 from tests.test_pumpfun_integration import test_pumpfun_integration
 from tests.test_jito_integration import test_jito_integration
