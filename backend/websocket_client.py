@@ -31,13 +31,28 @@ async def pump_fun_client():
                     elif data.get('event') == 'trade':
                         await handle_trade_event(data)
                         logger.info(f"Received trade data: {data}")
+                    from backend.models import db, Token, Trade
+
                     async def store_new_token_data(data):
-                        # Implement logic to store new token data in the database
-                        pass
+                        new_token = Token(
+                            name=data['name'],
+                            symbol=data['symbol'],
+                            launch_date=data['launch_date'],
+                            price=data['price'],
+                            volume=data['volume']
+                        )
+                        db.session.add(new_token)
+                        db.session.commit()
 
                     async def store_trade_data(data):
-                        # Implement logic to store trade data in the database
-                        pass
+                        new_trade = Trade(
+                            token_id=data['token_id'],
+                            trade_time=data['trade_time'],
+                            amount=data['amount'],
+                            price=data['price']
+                        )
+                        db.session.add(new_trade)
+                        db.session.commit()
                     # Store relevant information in the database
                     if data.get('event') == 'newToken':
                         await store_new_token_data(data)

@@ -86,37 +86,3 @@ if __name__ == '__main__':
     logger.info("Running Flask app with SocketIO")
     socketio.init_app(app)
     socketio.run(app, debug=True, host='0.0.0.0', port=8080, use_reloader=False, log_output=True)
-from pumpportal.pumpportal_client import PumpPortalClient
-from database.models import Base
-from database.database import engine
-from database.database import engine
-from database.models import Base
-
-async def handle_new_token_event(new_token_event):
-    # Parse the new token event and create a new Token instance
-    new_token = Token(
-        name=new_token_event['event']['name'],
-        symbol=new_token_event['event']['symbol'],
-        launch_date=new_token_event['event']['launch_date'],
-        price=new_token_event['event']['price'],
-        volume=new_token_event['event']['volume']
-    )
-    # Add and commit the new token to the database
-    db.session.add(new_token)
-    db.session.commit()
-    logger.info(f"New token created: {new_token_event}")
-
-async def main():
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-
-    # Initialize PumpPortal client
-    pumpportal_client = PumpPortalClient()
-
-    # Subscribe to new token events
-    async for new_token_event in pumpportal_client.subscribe_new_token():
-        await handle_new_token_event(new_token_event)
-
-if __name__ == "__main__":
-    asyncio.run(main())
