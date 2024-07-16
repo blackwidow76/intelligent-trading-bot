@@ -33,6 +33,10 @@ async def subscribe_to_streams(websocket):
     }
     await websocket.send(json.dumps(payload))
 
+    # Log the subscription confirmation
+    confirmation = await websocket.recv()
+    log.info(f"Subscription confirmation: {confirmation}")
+
     # Subscribe to trade events
     payload = {
         "method": "subscribeTokenTrade",
@@ -58,6 +62,9 @@ async def subscribe_to_streams(websocket):
 async def main():
     async with websockets.connect(uri) as websocket:
         await subscribe_to_streams(websocket)
+        async for message in websocket:
+            data = json.loads(message)
+            log.info(f"Received data: {data}")
 #  Create event queue for processing incoming events. Writings to one file must be sequential - not in parallel.
 #    But writes in different files can be independent tasks.
 #    How to ensure sequential tasks? Essentially, incoming events are not allowed to overlap somewhere down the pipeline (at the end).
