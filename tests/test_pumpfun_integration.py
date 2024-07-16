@@ -1,8 +1,8 @@
 import pytest
-import requests
+from websocket import create_connection
 
 def test_pumpfun_integration():
-    # Test endpoint for Pump.fun integration
-    response = requests.get("https://pumpportal.fun/api/data")
-    assert response.status_code == 200
-    assert "data" in response.json()
+    # Test WebSocket connection for Pump.fun integration
+    ws = create_connection("ws://pumpportal.fun/ws/data")
+    assert ws.connected, "WebSocket connection failed"
+    ws.close()
