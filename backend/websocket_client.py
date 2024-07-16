@@ -55,7 +55,10 @@ async def pump_fun_client():
 
 async def store_new_token_mint_data(data):
     new_token = Token()
-    new_token.contract_address = data['contract_address']
+    if 'contract_address' in data:
+        new_token.contract_address = data['contract_address']
+    else:
+        logger.error("Missing 'contract_address' key in data")
     db.session.add(new_token)
     db.session.commit()
 
