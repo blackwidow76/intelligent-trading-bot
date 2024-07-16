@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from service.App import App
 from database.models import Token, TokenMetadata
 from database.database import SessionLocal
+import aiohttp
 
 class PumpPortalClient:
     def __init__(self):
@@ -38,11 +39,12 @@ class PumpPortalClient:
                     yield {"event": event, "metadata": token_metadata}
 
     async def fetch_token_metadata(self, token_metadata_url):
-        response = requests.get(token_metadata_url)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return {"error": "Failed to fetch token metadata"}
+        async with aiohttp.ClientSession() as session:
+            async with session.get(token_metadata_url) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    return {"error": "Failed to fetch token metadata"}
 
     async def store_token_data(self, event, metadata):
         db = SessionLocal()
@@ -63,6 +65,18 @@ class PumpPortalClient:
             )
             db.add(token_metadata)
             db.commit()
+
+            # Store trade details if available
+            if "trades" in event:
+                for trade in event["trades"]:
+                    trade_record = Trade(
+                        token_id=token.id,
+                        trade_time=trade["timestamp"],
+                        amount=trade["amount"],
+                        price=trade["price"]
+                    )
+                    db.add(trade_record)
+                db.commit()
         finally:
             db.close()
 
