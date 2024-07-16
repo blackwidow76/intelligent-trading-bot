@@ -3,7 +3,7 @@ import websockets
 import json
 import logging
 from flask_socketio import SocketIO
-from config import Config
+from .config import Config
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
