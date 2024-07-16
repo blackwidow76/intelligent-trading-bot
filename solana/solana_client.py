@@ -24,6 +24,9 @@ class SolanaClient:
     import requests
     import json
 
+    import requests
+    import json
+
     async def submit_mev_bundle(self, bundle):
         # Manage costs and bundle tipping
         from utils import add_tip_to_bundle
