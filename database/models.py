@@ -31,7 +31,7 @@ class Trade(Base):
     id = Column(Integer, primary_key=True, index=True)
     token_id = Column(Integer, ForeignKey("tokens.id"))
     trade_time = Column(DateTime)
-    amount = Column(Float)
-    price = Column(Float)
+    amount = Column(sqlalchemy.Float)
+    price = Column(sqlalchemy.Float)
 
     token = relationship("Token", back_populates="trades")
