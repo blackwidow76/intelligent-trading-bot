@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 class Token(Base):
+    __tablename__ = 'tokens'
     __tablename__ = "tokens"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -26,6 +27,7 @@ class TokenMetadata(Base):
     token = relationship("Token", back_populates="metadata")
 
 class Trade(Base):
+    __tablename__ = 'trades'
     __tablename__ = "trades"
 
     id = Column(Integer, primary_key=True, index=True)
