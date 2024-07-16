@@ -27,8 +27,9 @@ log = logging.getLogger('collector_ws')
 
 # Subscribe to new token events
 async def subscribe_to_streams(websocket):
+    # Subscribe to new token mint events
     payload = {
-        "method": "subscribeNewToken",
+        "method": "subscribeNewTokenMint",
     }
     await websocket.send(json.dumps(payload))
 
