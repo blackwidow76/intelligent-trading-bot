@@ -83,7 +83,12 @@ async def process_data(data):
         elif data.get('event') == 'mevBotTransaction':
             # Assuming mev_bot is defined in backend/mev_bot.py
             from backend.mev_bot import MEVBot
-            mev_bot = MEVBot(solana_client, bitquery_client)  # Assuming these clients are initialized somewhere
+            # Assuming solana_client and bitquery_client are initialized somewhere
+            from solana.rpc.api import Client as SolanaClient
+            from bitquery import Bitquery
+            solana_client = SolanaClient()  # Initialize or import the actual instance
+            bitquery_client = Bitquery()  # Initialize or import the actual instance
+            mev_bot = MEVBot(solana_client, bitquery_client)
             await mev_bot.execute_transaction(data)
     except websockets.exceptions.ConnectionClosed:
         logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
