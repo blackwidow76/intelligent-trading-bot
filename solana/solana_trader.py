@@ -16,8 +16,12 @@ class SolanaTrader:
         # Implement wallet loading logic here
         pass
 
+    import requests
+    import json
+
     async def submit_swap_transaction(self, transaction):
         # Optimize transaction construction and submission
+        from utils import optimize_transaction
         optimized_transaction = optimize_transaction(transaction)
         response = requests.post(
             url=self.client.rpc_url,
@@ -25,13 +29,6 @@ class SolanaTrader:
             data=json.dumps(optimized_transaction)
         )
         return response.json()
-        response = requests.post(
-            url=self.client.rpc_url,
-            headers={"Content-Type": "application/json"},
-            data=json.dumps(transaction)
-        )
-        return response.json()
-        return await self.client.get_balance(self.wallet.public_key)
 
     async def place_order(self, amount, price):
         # Implement order placement logic here

@@ -21,8 +21,12 @@ class SolanaClient:
 
     # Add more Solana-specific methods here
 
+    import requests
+    import json
+
     async def submit_mev_bundle(self, bundle):
         # Manage costs and bundle tipping
+        from utils import add_tip_to_bundle
         bundle_with_tip = add_tip_to_bundle(bundle)
         response = requests.post(
             url=self.client.rpc_url,
@@ -30,10 +34,3 @@ class SolanaClient:
             data=json.dumps(bundle_with_tip)
         )
         return response.json()
-        response = requests.post(
-            url=self.client.rpc_url,
-            headers={"Content-Type": "application/json"},
-            data=json.dumps(bundle)
-        )
-        return response.json()
-        await self.client.close()
