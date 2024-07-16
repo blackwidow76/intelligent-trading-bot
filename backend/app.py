@@ -1,14 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from .websocket_client import pump_fun_client, socketio  # Ensure this matches the correct file name
-from config import config
+from .config import Config
 import os
 import logging
 import asyncio
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config.from_object(config)
+app.config.from_object(Config)
 db = SQLAlchemy(app)
 
 # Setup logging
