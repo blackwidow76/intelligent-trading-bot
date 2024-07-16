@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from websocket_client import pump_fun_client, socketio  # Ensure this matches the correct file name
+from .websocket_client import pump_fun_client, socketio  # Ensure this matches the correct file name
 from config import config
 import os
 import logging
