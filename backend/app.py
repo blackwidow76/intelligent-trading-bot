@@ -75,6 +75,9 @@ def add_user():
 
 if __name__ == '__main__':
     logger.info("Initializing Flask app")
+    # Add testing logic here
+    test_pumpfun_integration()
+    test_jito_integration()
     try:
         asyncio.run(pump_fun_client())
     except Exception as e:

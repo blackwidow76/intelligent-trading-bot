@@ -3,7 +3,7 @@ from solana.rpc.commitment import Confirmed
 import asyncio
 
 class SolanaClient:
-    def __init__(self, rpc_url):
+    def __init__(self, rpc_url="https://ny.mainnet.block-engine.jito.wtf/"):
         self.client = AsyncClient(rpc_url, commitment=Confirmed)
 
     async def get_balance(self, public_key):
@@ -14,10 +14,26 @@ class SolanaClient:
         else:
             raise ConnectionError("Failed to connect to Solana network")
 
-    async def get_recent_blockhash(self):
+    async def listen_for_pending_swaps(self):
+        # Implement logic to listen for pending swaps
+        pass
         return await self.client.get_recent_blockhash()
 
     # Add more Solana-specific methods here
 
-    async def close(self):
+    async def submit_mev_bundle(self, bundle):
+        # Manage costs and bundle tipping
+        bundle_with_tip = add_tip_to_bundle(bundle)
+        response = requests.post(
+            url=self.client.rpc_url,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(bundle_with_tip)
+        )
+        return response.json()
+        response = requests.post(
+            url=self.client.rpc_url,
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(bundle)
+        )
+        return response.json()
         await self.client.close()

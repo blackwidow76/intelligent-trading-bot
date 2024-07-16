@@ -13,7 +13,7 @@ socketio = SocketIO()
 
 # WebSocket client to connect to Pump.fun
 async def pump_fun_client():
-    uri = config.PUMPPORTAL_API_URL
+    uri = "wss://pumpportal.fun/api/data"
     logger.info("Starting Pump.fun WebSocket client")
     while True:
         try:
@@ -23,12 +23,12 @@ async def pump_fun_client():
                     message = await websocket.recv()
                     data = json.loads(message)
                     # Process and emit the data to connected clients
-                    if data.get('event') == 'TOKEN_MINT':
-                        socketio.emit('new_mint', data)
-                        logger.info(f"Received new mint data: {data}")
-                    else:
-                        socketio.emit('other_event', data)
-                        logger.info(f"Received other event data: {data}")
+                    if data.get('event') == 'newToken':
+                        await handle_new_token_event(data)
+                        logger.info(f"Received new token data: {data}")
+                    elif data.get('event') == 'trade':
+                        await handle_trade_event(data)
+                        logger.info(f"Received trade data: {data}")
         except websockets.exceptions.ConnectionClosed:
             logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
             await asyncio.sleep(5)
