@@ -4,7 +4,7 @@ from models import db, Token, User
 from websocket_client import pump_fun_client
 import logging
 import asyncio
-from backend.pumpportal_client import PumpPortalClient  # Import PumpPortalClient
+from .pumpportal_client import PumpPortalClient  # Import PumpPortalClient
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
