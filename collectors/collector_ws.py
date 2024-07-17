@@ -34,10 +34,10 @@ async def subscribe_to_streams(websocket, streams):
         await websocket.send(json.dumps(payload))
 
 # Call the function within an async context
-async def main():
+async def main():   
     uri = "wss://pumpportal.fun/api/data"  # Replace with actual URI
     async with websockets.connect(uri) as websocket:  # Use websockets.connect
-        await subscribe_to_streams(websocket)
+        await subscribe_to_streams(websocket, ["stream1", "stream2"])  # Example streams
         async for message in websocket:
             data = json.loads(message)
             log.info(f"Received data: {data}")
