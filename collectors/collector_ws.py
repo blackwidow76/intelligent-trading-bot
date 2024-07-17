@@ -61,8 +61,12 @@ def process_message(msg):
 
     log.info(f"Event received: {event}")
 
-    # Submit a task to our main event queue
-    App.analyzer.queue.put(event)
+    # Store the received data
+    store_data(event)
+
+def store_data(data):
+    # Assuming 'data' collection exists in the database
+    db.data.insert_one(data)
 
 
 def start_collector_ws():
