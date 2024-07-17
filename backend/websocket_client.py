@@ -3,7 +3,7 @@ import websockets
 import json
 import logging
 from flask_socketio import SocketIO
-from config import Config
+from backend.config import Config
 from flask_pymongo import PyMongo
 from database.models import Token  # Import Token along with Trade
 
