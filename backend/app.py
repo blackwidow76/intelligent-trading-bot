@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from pumpportal.pumpportal_client import PumpPortalClient
+from backend.pumpportal_client import PumpPortalClient
 import logging
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
