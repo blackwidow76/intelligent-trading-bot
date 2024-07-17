@@ -5,9 +5,9 @@ import logging
 from flask_socketio import SocketIO
 from backend.config import Config
 from flask_pymongo import PyMongo
-from database.models import Token, Trade  # Import Trade
+from database.models import Token   
 from .pumpportal_client import fetch_token_metadata
-from backend.app import db  # Import db
+
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
