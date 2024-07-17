@@ -5,9 +5,11 @@ import logging
 from flask_socketio import SocketIO
 from backend.config import Config
 from flask_pymongo import PyMongo
-from database.models import Token   
-from .pumpportal_client import fetch_token_metadata
-
+from database.models import Token
+import aiohttp
+from pymongo import MongoClient
+from dotenv import load_dotenv
+from service.App import App
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -22,6 +24,9 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from shared.websocket_client import WebSocketClient
+
+client = MongoClient(App.config["MONGODB_URI"])
+db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name
 
 class PumpPortalClient:
     def __init__(self):
