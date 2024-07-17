@@ -45,7 +45,8 @@ class PumpPortalClient:
     async def subscribe_new_token(self):
         await pump_fun_client(self.websocket_url, "subscribeNewToken", process_data)
 
-    async def fetch_token_metadata(self, token_metadata_url):
+    async def fetch_token_metadata(self, contract_address):
+        token_metadata_url = f"{self.token_metadata_url}/{contract_address}"
         async with aiohttp.ClientSession() as session:
             async with session.get(token_metadata_url) as response:
                 if response.status == 200:
