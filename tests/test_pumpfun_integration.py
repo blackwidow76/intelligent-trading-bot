@@ -1,5 +1,5 @@
 import pytest
-from backend.websocket_client import pump_fun_client
+from backend.websocket_client import pump_fun_client, process_data
 
 import asyncio
 
