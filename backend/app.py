@@ -53,6 +53,8 @@ def add_token():
 from tests.test_pumpfun_integration import test_pumpfun_integration
 from tests.test_jito_integration import test_jito_integration
 
+import asyncio  # Add import for asyncio
+
 if __name__ == '__main__':
     logger.info("Initializing Flask app")
     # Add testing logic here
