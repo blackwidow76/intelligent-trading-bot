@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from backend.pumpportal_client import PumpPortalClient
 import logging
-from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
 from .config import Config
@@ -61,7 +60,6 @@ if __name__ == '__main__':
     test_pumpfun_integration()
     test_jito_integration()
     try:
-        from pumpportal.pumpportal_client import PumpPortalClient
         client = PumpPortalClient()
         asyncio.run(client.subscribe_new_token())
     except Exception as e:
