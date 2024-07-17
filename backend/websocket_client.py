@@ -24,8 +24,7 @@ import sys
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-
-MONGODB_URI = App.config.get("MONGODB_URI", "mongodb://localhost:27017/pumpportal")
+MONGODB_URI = App.config.get("MONGODB_URI", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.6")
 client = MongoClient(MONGODB_URI)
 db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name
 
@@ -86,6 +85,16 @@ class PumpPortalClient:
         }
         response = requests.post(f"{self.api_url}/trade-local", data=data)
         return response.content
+    async def process_data(self, data):
+        # Deferred import to avoid circular dependency
+        from backend.mev_bot import MEVBot
+        from solana.rpc.api import Client as SolanaClient
+        from bitquery import BitqueryClient  # Corrected import
+
+        solana_client = SolanaClient("https://api.mainnet-beta.solana.com")  # Provide the Solana RPC URL
+        bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
+        mev_bot = MEVBot(solana_client, bitquery_client)
+        await mev_bot.execute_transaction(data)
 
 async def pump_fun_client(uri, method, process_data_func, keys=None):
     logger.info("Starting Pump.fun WebSocket client")
@@ -122,13 +131,13 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
                         logger.warning("WebSocket connection timed out. Sending keep-alive ping.")
                         await websocket.send(json.dumps({"type": "ping"}))
                         last_heartbeat = asyncio.get_event_loop().time()
-        except websockets.ConnectionClosedError as e:
+        except websockets.exceptions.ConnectionClosedError as e:  # Corrected exception
             logger.error(f"Connection to Pump.fun WebSocket closed with error: {e}. Reconnecting in {retry_interval} seconds...")
             await asyncio.sleep(retry_interval)
-        except websockets.ConnectionClosedOK as e:
+        except websockets.exceptions.ConnectionClosedOK as e:  # Corrected exception
             logger.error(f"Connection to Pump.fun WebSocket closed normally: {e}. Reconnecting in {retry_interval} seconds...")
             await asyncio.sleep(retry_interval)
-        except websockets.InvalidStatusCode as e:
+        except websockets.exceptions.InvalidStatusCode as e:  # Corrected exception
             logger.error(f"WebSocket server rejected connection with status code: {e.status_code}")
             await asyncio.sleep(retry_interval)
         except Exception as e:
@@ -138,25 +147,22 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
         # Implement exponential backoff
         retry_interval = min(retry_interval * 2, 300)  # Cap at 300 seconds (5 minutes)
 
-
-
 async def store_new_token_mint_data(data):
     logger.debug(f"Storing new token mint data: {data}")
     from backend.app import app  # Import the app instance
     with app.app_context():  # Push the application context
-        new_token = Token()
-        if 'contract_address' in data:
-            new_token.contract_address = data['contract_address']
-        else:
+        new_token = Token(contract_address=data.get('contract_address'))  # Provide required argument
+        if not new_token.contract_address:
             logger.error("Missing 'contract_address' key in data")
+            return
         db.session.add(new_token)
         db.session.commit()
 
 from backend.app import mongo  # Import mongo instance
+from backend.models import Trade, Token  # Import necessary models
 
 async def fetch_and_store_token_metadata(contract_address):
     logger.debug(f"Fetching and storing token metadata for contract: {contract_address}")
-    from backend.pumpportal_client import fetch_token_metadata
     metadata = await fetch_token_metadata(contract_address)
     token = mongo.db.tokens.find_one({"contract_address": contract_address})
     if token:
@@ -168,18 +174,26 @@ async def fetch_and_store_token_metadata(contract_address):
             'volume': metadata.get('volume', 0)
         }
         mongo.db.tokens.update_one({'_id': token['_id']}, {'$set': update_data})
-
+    else:
+        new_token = Token(
+            name=metadata.get('name', 'N/A'),
+            symbol=metadata.get('symbol', 'N/A'),
+            launch_date=metadata.get('launch_date', 'N/A'),
+            price=metadata.get('price', 0),
+            volume=metadata.get('volume', 0),
+            contract_address=contract_address
+        )
+        mongo.db.tokens.insert_one(new_token.to_dict())
 
 async def store_trade_data(data):
     logger.debug(f"Storing trade data: {data}")
     new_trade = Trade(
-        token_id=data['token_id'],
+        token=data['token'],
         trade_time=data['trade_time'],
         amount=data['amount'],
         price=data['price']
     )
-    db.session.add(new_trade)
-    db.session.commit()
+    mongo.db.trades.insert_one(new_trade.to_dict())
 
 async def process_data(data):
     logger.debug(f"Processing data: {data}")
