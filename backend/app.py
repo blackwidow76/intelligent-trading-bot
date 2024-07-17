@@ -9,7 +9,8 @@ import asyncio
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

@@ -10,7 +10,8 @@ from websocket_client import pump_fun_client, socketio
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+db = SQLAlchemy()
+db.init_app(app)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
