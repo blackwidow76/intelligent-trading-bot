@@ -1,4 +1,3 @@
-from re import M
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from pumpportal.pumpportal_client import PumpPortalClient
