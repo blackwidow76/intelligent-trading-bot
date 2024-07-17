@@ -3,7 +3,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from service.App import App
-from database.models import Token, TokenMetadata
+from database.models import Token, TokenMetadata, Trade
 from database.database import SessionLocal
 import aiohttp
 from backend.websocket_client import pump_fun_client, process_data
