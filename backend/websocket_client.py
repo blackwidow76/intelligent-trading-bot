@@ -5,7 +5,8 @@ import logging
 from flask_socketio import SocketIO
 from backend.config import Config
 from flask_pymongo import PyMongo
-from database.models import Token  # Import Token along with Trade
+from database.models import Token 
+from pumpportal_client import fetch_token_metadata
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
@@ -103,8 +104,6 @@ async def fetch_and_store_token_metadata(contract_address):
         }
         mongo.db.tokens.update_one({'_id': token['_id']}, {'$set': update_data})
 
-from backend.app import db  # Import db instance
-from database.models import Trade  # Import Trade model
 
 async def store_trade_data(data):
     logger.debug(f"Storing trade data: {data}")
