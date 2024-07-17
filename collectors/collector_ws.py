@@ -64,6 +64,8 @@ def process_message(msg):
     # Store the received data
     store_data(event)
 
+from database.database import db
+
 def store_data(data):
     # Assuming 'data' collection exists in the database
     db.data.insert_one(data)
