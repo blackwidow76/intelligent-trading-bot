@@ -23,8 +23,10 @@ class PumpPortalClient:
         data = response.json()
         return data
 
+    from shared.websocket_client import WebSocketClient
+
     async def subscribe_new_token(self):
-        async with websockets.connect(self.websocket_url) as websocket:
+        async with WebSocketClient(self.websocket_url) as websocket:
             payload = {
                 "method": "subscribeNewToken",
             }
