@@ -72,7 +72,7 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
         # Implement exponential backoff
         retry_interval = min(retry_interval * 2, 300)  # Cap at 300 seconds (5 minutes)
 
-from backend.app import db  # Import db instance
+
 
 async def store_new_token_mint_data(data):
     logger.debug(f"Storing new token mint data: {data}")
@@ -90,7 +90,7 @@ from backend.app import mongo  # Import mongo instance
 
 async def fetch_and_store_token_metadata(contract_address):
     logger.debug(f"Fetching and storing token metadata for contract: {contract_address}")
-    from pumpportal.pumpportal_client import fetch_token_metadata
+    from backend.pumpportal_client import fetch_token_metadata
     metadata = await fetch_token_metadata(contract_address)
     token = mongo.db.tokens.find_one({"contract_address": contract_address})
     if token:
