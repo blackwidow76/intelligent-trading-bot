@@ -394,9 +394,9 @@ def execute_order(order: dict):
     if trade_model.get("test_order_before_submit"):
         try:
             log.info(f"Submitting test order: {order}")
-            test_response = App.client.create_test_order(**order)  # Returns {} if ok. Does not check available balances - only trade rules
+            test_response = pumpfun_client.submit_order(**order)  # Assuming PumpFun has a similar method
         except Exception as e:
-            log.error(f"Binance exception in 'create_test_order' {e}")
+            log.error(f"PumpFun exception in 'submit_order' {e}")
             # TODO: Reset/resync whole account
             return
 
@@ -409,9 +409,9 @@ def execute_order(order: dict):
         # Submit order
         try:
             log.info(f"Submitting order: {order}")
-            order = App.client.create_order(**order)
+            order = pumpfun_client.submit_order(**order)  # Assuming PumpFun has a similar method
         except Exception as e:
-            log.error(f"Binance exception in 'create_order' {e}")
+            log.error(f"PumpFun exception in 'submit_order' {e}")
             return
 
         if not order or not order.get("status"):
