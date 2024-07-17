@@ -25,7 +25,7 @@ class Token(db.Model):
     symbol = db.Column(db.String(10), nullable=False)
     launch_date = db.Column(db.DateTime, nullable=False)
     price = db.Column(db.Float, nullable=False)
-    volume = db.Column(db.Float, nullable=False)
+    volume = db.Column(db.Float, nullable=True)
 
     def __init__(self, name, symbol, launch_date, price, volume):
         self.name = name
