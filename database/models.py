@@ -3,7 +3,7 @@ from pymongo import MongoClient
 import os
 
 client = MongoClient(os.getenv('MONGODB_URI'))
-db = client.get_default_database()
+db = client.get_database('pumpportal')  # Replace 'pumpportal' with the actual default database name
 
 db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name 
 
