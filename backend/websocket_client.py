@@ -164,7 +164,7 @@ from backend.models import Trade, Token  # Import necessary models
 
 async def fetch_and_store_token_metadata(contract_address):
     logger.debug(f"Fetching and storing token metadata for contract: {contract_address}")
-    metadata = await fetch_token_metadata(contract_address)
+    metadata = await self.fetch_token_metadata(contract_address)
     token = mongo.db.tokens.find_one({"contract_address": contract_address})
     if token:
         update_data = {
