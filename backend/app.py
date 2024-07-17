@@ -9,14 +9,11 @@ import asyncio
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
-db = SQLAlchemy()
+db = SQLAlchemy(app)  # Initialize SQLAlchemy with the app
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Register the Flask app with the SQLAlchemy instance
-db.init_app(app)
 
 # Define SQLAlchemy models
 class Token(db.Model):
