@@ -54,7 +54,7 @@ async def pump_fun_client():
             await process_data(data)
 
 async def store_new_token_mint_data(data):
-    from app import app  # Import the app instance
+    from backend.app import app  # Import the app instance
     with app.app_context():  # Push the application context
         new_token = Token()
         if 'contract_address' in data:
