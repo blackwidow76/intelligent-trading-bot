@@ -1,39 +1,24 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+from flask_pymongo import PyMongo
+from pymongo import MongoClient
+import os
 
-Base = declarative_base()
+client = MongoClient(os.getenv('MONGODB_URI'))
+db = client.get_default_database()
 
-class Token(Base):
-    __tablename__ = 'tokens'
-    __tablename__ = "tokens"
+db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name 
 
-    id = Column(Integer, primary_key=True, index=True)
-    contract_address = Column(String, unique=True, index=True)
-    creation_time = Column(DateTime)
+from bson import ObjectId
+from datetime import datetime
 
-    token_metadata = relationship("TokenMetadata", back_populates="token", uselist=False)
+class Token:
+    def __init__(self, contract_address, creation_time=None):
+        self.contract_address = contract_address
+        self.creation_time = creation_time if creation_time else datetime.utcnow()
+        self._id = ObjectId()
 
-class TokenMetadata(Base):
-    __tablename__ = "token_metadata"
-
-    id = Column(Integer, primary_key=True, index=True)
-    token_id = Column(Integer, ForeignKey("tokens.id"))
-    name = Column(String)
-    symbol = Column(String)
-    decimals = Column(Integer)
-    total_supply = Column(String)
-
-    token = relationship("Token", back_populates="metadata")
-
-class Trade(Base):
-    __tablename__ = 'trades'
-    __tablename__ = "trades"
-
-    id = Column(Integer, primary_key=True, index=True)
-    token_id = Column(Integer, ForeignKey("tokens.id"))
-    trade_time = Column(DateTime)
-    amount = Column(Float)
-    price = Column(Float)
-
-    token = relationship("Token", back_populates="trades")
+    def to_dict(self):
+        return {
+            "_id": self._id,
+            "contract_address": self.contract_address,
+            "creation_time": self.creation_time
+        }
