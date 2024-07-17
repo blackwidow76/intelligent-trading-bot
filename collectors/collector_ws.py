@@ -5,6 +5,11 @@ import asyncio
 import websockets
 import json
 import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
+
 from service.App import App
 from service.analyzer import Analyzer
 # Subscribe to a stream and receive the events with updates
