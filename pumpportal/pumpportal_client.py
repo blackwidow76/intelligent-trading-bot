@@ -1,6 +1,4 @@
 import asyncio
-import websockets
-import json
 import requests
 import os
 from dotenv import load_dotenv
@@ -8,6 +6,7 @@ from service.App import App
 from database.models import Token, TokenMetadata
 from database.database import SessionLocal
 import aiohttp
+from backend.websocket_client import pump_fun_client, process_data
 
 class PumpPortalClient:
     def __init__(self):
@@ -23,22 +22,8 @@ class PumpPortalClient:
         data = response.json()
         return data
 
-    from shared.websocket_client import WebSocketClient
-
     async def subscribe_new_token(self):
-        async with WebSocketClient(self.websocket_url) as websocket:
-            payload = {
-                "method": "subscribeNewToken",
-            }
-            await websocket.send(json.dumps(payload))
-            async for message in websocket:
-                event = json.loads(message)
-                if event.get("event") == "newToken":
-                    contract_address = event["contractAddress"]
-                    token_metadata_url = f"{self.token_metadata_url}/{contract_address}"
-                    token_metadata = await self.fetch_token_metadata(token_metadata_url)
-                    await self.store_token_data(event, token_metadata)
-                    yield {"event": event, "metadata": token_metadata}
+        await pump_fun_client(self.websocket_url, "subscribeNewToken", process_data)
 
     async def fetch_token_metadata(self, token_metadata_url):
         async with aiohttp.ClientSession() as session:
@@ -83,24 +68,10 @@ class PumpPortalClient:
             db.close()
 
     async def subscribe_account_trade(self, accounts):
-        async with websockets.connect(self.websocket_url) as websocket:
-            payload = {
-                "method": "subscribeAccountTrade",
-                "keys": accounts
-            }
-            await websocket.send(json.dumps(payload))
-            async for message in websocket:
-                yield json.loads(message)
+        await pump_fun_client(self.websocket_url, "subscribeAccountTrade", process_data, keys=accounts)
 
     async def subscribe_token_trade(self, tokens):
-        async with websockets.connect(self.websocket_url) as websocket:
-            payload = {
-                "method": "subscribeTokenTrade",
-                "keys": tokens
-            }
-            await websocket.send(json.dumps(payload))
-            async for message in websocket:
-                yield json.loads(message)
+        await pump_fun_client(self.websocket_url, "subscribeTokenTrade", process_data, keys=tokens)
 
     async def trade(self, action, mint, amount, denominated_in_sol, slippage, priority_fee, pool):
         data = {
