@@ -11,4 +11,4 @@ except KeyError:
     MONGODB_URI = "mongodb://localhost:27017/"  # Default to local MongoDB instance
 
 client = MongoClient(MONGODB_URI)
-db = client.get_database()
+db = client.get_database('default_db_name')  # Replace 'default_db_name' with the actual default database name
