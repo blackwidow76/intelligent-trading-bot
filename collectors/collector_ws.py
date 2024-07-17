@@ -1,26 +1,12 @@
 import os
 import sys
 import argparse
-import math, time
-from datetime import datetime, date
-import time
-
-import pandas as pd
-import asyncio
-
 import asyncio
 import websockets
 import json
-from solana.rpc.api import Client as SolanaClient
-
-from common.utils import *
-from service.App import *
-from service.analyzer import *
-
 import logging
-log = logging.getLogger('collector_ws')
-
-#
+from service.App import App
+from service.analyzer import Analyzer
 # Subscribe to a stream and receive the events with updates
 # The received data is stored in the corresponding files
 #
