@@ -24,7 +24,6 @@ import sys
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from shared.websocket_client import WebSocketClient
 
 client = MongoClient(App.config["MONGODB_URI"])
 db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name

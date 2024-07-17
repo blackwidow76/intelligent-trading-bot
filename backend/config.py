@@ -1,13 +1,15 @@
 import os
 from dotenv import load_dotenv
 
+from service import App
+
 # Load environment variables from .env file
 load_dotenv()
 
+
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MONGODB_URI = os.getenv('MONGODB_URI')  
     PUMPPORTAL_API_URL = os.getenv('PUMPPORTAL_API_URL', 'wss://pumpportal.fun/api/data')
     PUMPPORTAL_API_KEY = os.getenv('PUMPPORTAL_API_KEY')
-
-config = Config()
+    PUMPPORTAL_PUBLIC_KEY = os.getenv('PUMPPORTAL_PUBLIC_KEY')
+    PUMPPORTAL_PRIVATE_KEY = os.getenv('PUMPPORTAL_PRIVATE_KEY')
