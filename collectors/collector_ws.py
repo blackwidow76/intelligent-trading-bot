@@ -25,12 +25,13 @@ log = logging.getLogger('collector_ws')
 # The received data is stored in the corresponding files
 #
 
-async def subscribe_to_streams(websocket):
-    # Subscribe to create transaction events
-    payload = {
-        "method": "subscribeCreateTransaction",
-    }
-    await websocket.send(json.dumps(payload))
+async def subscribe_to_streams(websocket, streams):
+    for stream in streams:
+        payload = {
+            "method": "subscribe",
+            "stream": stream
+        }
+        await websocket.send(json.dumps(payload))
 
 # Call the function within an async context
 async def main():
@@ -51,37 +52,32 @@ async def main():
 
 def process_message(msg):
     if msg is None:
-        print(f"Empty message received")
+        log.error("Empty message received")
         return
     if not isinstance(msg, dict):
-        print(f"Message received is not dict")
-        return
-    if len(msg.keys()) != 2:
-        print(f"Message received has unexpected length. Message: {msg}")
+        log.error("Message received is not dict")
         return
 
     error = msg.get('e')
     if error is not None:
         error_message = msg.get('m')
-        print(f"Connection error: {error_message}")
+        log.error(f"Connection error: {error_message}")
         return
 
     stream = msg.get('stream')
     if stream is None:
-        print(f"Empty stream received. Message: {msg}")
-        # TODO: Check what happens and maybe reconnect
+        log.error("Empty stream received")
         return
     stream_symbol, stream_channel = tuple(stream.split("@"))
 
     event = msg.get('data')
     if event is None:
-        print(f"Empty event received. Message {msg}")
-        # TODO: Check what happens and maybe reconnect
+        log.error("Empty event received")
         return
 
     event_channel = event.get('e')
     if event_channel == 'error':
-        # close and restart the socket
+        log.error("Event channel error")
         return
     if event_channel is None:
         event["e"] = stream_channel
@@ -94,7 +90,7 @@ def process_message(msg):
     if event_ts is None:
         event["E"] = int(datetime.utcnow().timestamp() * 1000)
 
-    #print(f"Event symbol: {event_symbol}, Event channel: {event_channel}")
+    log.info(f"Event symbol: {event_symbol}, Event channel: {event_channel}")
 
     # Submit a task to our main event queue
     App.analyzer.queue.put(event)
