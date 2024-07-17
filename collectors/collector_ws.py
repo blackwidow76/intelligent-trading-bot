@@ -25,39 +25,7 @@ log = logging.getLogger('collector_ws')
 # The received data is stored in the corresponding files
 #
 
-# Subscribe to new token events
 async def subscribe_to_streams(websocket):
-    # Subscribe to new token mint events
-    payload = {
-        "method": "subscribeNewTokenMint",
-    }
-    await websocket.send(json.dumps(payload))
-
-    # Log the subscription confirmation
-    confirmation = await websocket.recv()
-    log.info(f"Subscription confirmation: {confirmation}")
-
-    # Subscribe to trade events
-    payload = {
-        "method": "subscribeTokenTrade",
-        "keys": ["91WNez8D22NwBssQbkzjy4s2ipFrzpmn5hfvWVe2aY5p"]  # array of token CAs to watch
-    }
-    await websocket.send(json.dumps(payload))
-
-    # Subscribe to account trade events
-    payload = {
-        "method": "subscribeAccountTrade",
-        "keys": ["AArPXm8JatJiuyEffuC1un2Sc835SULa4uQqDcaGpAjV"]  # array of accounts to watch
-    }
-    await websocket.send(json.dumps(payload))
-
-    # Subscribe to MEV Bot transactions
-    payload = {
-        "method": "subscribeMEVBotTransaction",
-        "keys": ["MEVBotPublicKey"]  # Public key of the MEV Bot
-    }
-    await websocket.send(json.dumps(payload))
-
     # Subscribe to create transaction events
     payload = {
         "method": "subscribeCreateTransaction",
@@ -66,7 +34,8 @@ async def subscribe_to_streams(websocket):
 
 # Call the function within an async context
 async def main():
-    async with websockets.connect(uri) as websocket:
+    uri = "wss://pumpportal.fun/api/data"  # Replace with actual URI
+    async with websockets.connect(uri) as websocket:  # Use websockets.connect
         await subscribe_to_streams(websocket)
         async for message in websocket:
             data = json.loads(message)
