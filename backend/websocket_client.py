@@ -6,7 +6,7 @@ from flask_socketio import SocketIO
 from backend.config import Config
 from flask_pymongo import PyMongo
 from database.models import Token 
-from pumpportal_client import fetch_token_metadata
+from .pumpportal_client import fetch_token_metadata
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
