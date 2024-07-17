@@ -72,6 +72,8 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
         # Implement exponential backoff
         retry_interval = min(retry_interval * 2, 300)  # Cap at 300 seconds (5 minutes)
 
+from backend.app import db  # Import db instance
+
 async def store_new_token_mint_data(data):
     logger.debug(f"Storing new token mint data: {data}")
     from backend.app import app  # Import the app instance
@@ -83,6 +85,8 @@ async def store_new_token_mint_data(data):
             logger.error("Missing 'contract_address' key in data")
         db.session.add(new_token)
         db.session.commit()
+
+from backend.app import mongo  # Import mongo instance
 
 async def fetch_and_store_token_metadata(contract_address):
     logger.debug(f"Fetching and storing token metadata for contract: {contract_address}")
@@ -98,6 +102,9 @@ async def fetch_and_store_token_metadata(contract_address):
             'volume': metadata.get('volume', 0)
         }
         mongo.db.tokens.update_one({'_id': token['_id']}, {'$set': update_data})
+
+from backend.app import db  # Import db instance
+from database.models import Trade  # Import Trade model
 
 async def store_trade_data(data):
     logger.debug(f"Storing trade data: {data}")
