@@ -25,9 +25,7 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 
-MONGODB_URI = App.config.get("MONGODB_URI")
-if not MONGODB_URI:
-    raise ValueError("MONGODB_URI is not set in the configuration.")
+MONGODB_URI = App.config.get("MONGODB_URI", "mongodb://localhost:27017/pumpportal")
 client = MongoClient(MONGODB_URI)
 db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name
 
