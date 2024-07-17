@@ -5,11 +5,12 @@ import logging
 from flask_socketio import SocketIO
 from backend.config import Config
 from flask_pymongo import PyMongo
-from database.models import Token
+from database.models import Token, Trade
 import aiohttp
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from service.App import App
+import requests
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)
