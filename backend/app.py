@@ -1,11 +1,10 @@
 from flask import Flask, jsonify, request
 from pumpportal.pumpportal_client import PumpPortalClient
-from .config import Config
-from flask_pymongo import PyMongo
-import os
 import logging
-import asyncio
+from flask import Flask, jsonify, request
+from flask_pymongo import PyMongo
 from flask_socketio import SocketIO
+from .config import Config
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -60,6 +59,7 @@ if __name__ == '__main__':
     test_pumpfun_integration()
     test_jito_integration()
     try:
+        from pumpportal.pumpportal_client import PumpPortalClient
         client = PumpPortalClient()
         asyncio.run(client.subscribe_new_token())
     except Exception as e:
