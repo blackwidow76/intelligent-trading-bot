@@ -1,8 +1,7 @@
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from pumpportal.pumpportal_client import PumpPortalClient
 from .config import Config
-from pymongo import MongoClient
+from flask_pymongo import PyMongo
 import os
 import logging
 import asyncio
@@ -11,42 +10,45 @@ from flask_socketio import SocketIO
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
-db = MongoClient(os.getenv('MONGO_URI')) # Initialize SQLAlchemy with the app
-socketio = SocketIO(app)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Define SQLAlchemy models
-class Token(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    symbol = db.Column(db.String(10), nullable=False)
-    launch_date = db.Column(db.DateTime, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    volume = db.Column(db.Float, nullable=True)
+# Ensure MongoDB URI is set
+if not app.config.get("MONGO_URI"):
+    logger.error("MONGO_URI is not set in the configuration.")
+    exit(1)  # Exit if no MongoDB URI is provided
 
-    def __init__(self, name, symbol, launch_date, price, volume):
-        self.name = name
-        self.symbol = symbol
-        self.launch_date = launch_date
-        self.price = price
-        self.volume = volume
+mongo = PyMongo(app)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+# Debugging to check mongo initialization
+if not hasattr(mongo, 'db'):
+    logger.error("MongoDB has not been initialized correctly.")
+    exit(1)
 
-# Create database tables
-with app.app_context():
-    db.create_all()
+socketio = SocketIO(app)
 
 # Define routes
 @app.route("/")
 def home():
     return jsonify({"message": "Welcome to the Pump.fun API"})
+
+class Token:
+    def __init__(self, contract_address):
+        self.contract_address = contract_address
+
+    def to_dict(self):
+        return {"contract_address": self.contract_address}
+
+@app.route('/add_token', methods=['POST'])
+def add_token():
+    contract_address = request.form['contract_address']
+    token = Token(contract_address)
+    if 'tokens' not in mongo.db.list_collection_names():
+        mongo.db.create_collection('tokens')
+    mongo.db.tokens.insert_one(token.to_dict())
+    return 'Token added', 200
 
 
 from tests.test_pumpfun_integration import test_pumpfun_integration
