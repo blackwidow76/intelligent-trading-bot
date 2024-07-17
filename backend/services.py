@@ -2,36 +2,35 @@ import os
 import logging
 import asyncio
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_socketio import SocketIO
+from database.database import MONGODB_URI
 from websocket_client import pump_fun_client, socketio
 
 # Initialize Flask app
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy()
-db.init_app(app)
+app.config['MONGODB_URI'] = os.getenv('MONGODB_URI')
+app.config['MONGODB_DBNAME'] = 'pumpportal'
+db = MONGODB_URI(os.getenv('MONGODB_URI'))
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define SQLAlchemy models
-class Token(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    symbol = db.Column(db.String(10), nullable=False)
-    launch_date = db.Column(db.DateTime, nullable=False)
+class Token(db.Document):
+    id = db.IntField(primary_key=True)
+    name = db.StringField(required=True)
+    symbol = db.StringField(required=True)
+    launch_date = db.DateTimeField(required=True)
 
     def __init__(self, name, symbol, launch_date):
         self.name = name
         self.symbol = symbol
         self.launch_date = launch_date
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
+class User(db.Document):
+    id = db.IntField(primary_key=True)
+    username = db.StringField(required=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
 
 # Create database tables
@@ -71,10 +70,18 @@ def add_user():
     db.session.commit()
     return jsonify({"message": "User added successfully"}), 201
 
+# Define a processing function for the data received from the WebSocket
+def process_data(data):
+    # Implement your data processing logic here
+    pass
+
 if __name__ == '__main__':
     logger.info("Initializing Flask app")
     try:
-        asyncio.run(pump_fun_client())
+        # Specify the URI and method for the WebSocket connection
+        uri = "wss://pumpportal.fun/api/data"
+        method = "GET"
+        asyncio.run(pump_fun_client(uri, method, process_data))
     except Exception as e:
         logger.error(f"Error running the WebSocket client: {str(e)}", exc_info=True)
     logger.info("Running Flask app with SocketIO")

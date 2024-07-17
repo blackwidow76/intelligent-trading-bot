@@ -87,15 +87,12 @@ class PumpPortalClient:
         response = requests.post(f"{self.api_url}/trade-local", data=data)
         return response.content
     async def process_data(self, data):
-        # Deferred import to avoid circular dependency
-        from backend.mev_bot import MEVBot
-        from solana.rpc.api import Client as SolanaClient
-        from bitquery import BitqueryClient  # Corrected import
+        # Store the received data
+        await self.store_data(data)
 
-        solana_client = SolanaClient("https://api.mainnet-beta.solana.com")  # Provide the Solana RPC URL
-        bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
-        mev_bot = MEVBot(solana_client, bitquery_client)
-        await mev_bot.execute_transaction(data)
+    async def store_data(self, data):
+        # Assuming 'data' collection exists in the database
+        db.data.insert_one(data)
 
 class PumpPortalClient:
     def __init__(self):

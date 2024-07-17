@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from solana.rpc.api import Client as SolanaClient
-from bitquery import Bitquery
+
 
 logger = logging.getLogger(__name__)
 
