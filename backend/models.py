@@ -1,17 +1,27 @@
-from flask_sqlalchemy import SQLAlchemy
+from pymongo import MongoClient
+import os
 
-db = SQLAlchemy()
+from database.database import MONGODB_URI
 
-class Token(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
-    symbol = db.Column(db.String(10), nullable=False)
-    launch_date = db.Column(db.DateTime, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    volume = db.Column(db.Float, nullable=True)
-    contract_address = db.Column(db.String, unique=True, nullable=False)
+client = MongoClient(MONGODB_URI)
+db = client.get_default_database()
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+from mongoengine import Document, StringField, IntField, FloatField, DateTimeField
+
+class Token(Document):
+    name = StringField(required=True, max_length=80)
+    symbol = StringField(required=True, max_length=10)
+    launch_date = DateTimeField(required=True)
+    price = FloatField(required=True)
+    volume = FloatField()
+    contract_address = StringField(unique=True, required=True)
+
+class Trade(Document):
+    token = StringField(required=True)
+    trade_time = DateTimeField(required=True)
+    amount = FloatField(required=True)
+    price = FloatField(required=True)
+
+class User(Document):
+    username = StringField(unique=True, required=True)
+    email = StringField(unique=True, required=True)
