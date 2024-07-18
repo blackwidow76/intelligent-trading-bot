@@ -1,40 +1,27 @@
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
-from models import Token, User
+from flask import jsonify, request
+from app import app, socketio  # Updated to use relative import
+from models import db, Token, User
+from websocket_client import pump_fun_client
 import logging
+import asyncio
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
-app = FastAPI()
-
 # Define routes
-@app.get("/")
-async def home():
-    return JSONResponse({"message": "Welcome to the Pump.fun API"})
+@app.route("/")
+def home():
+    return jsonify({"message": "Welcome to the Pump.fun API"})
 
-@app.get("/tokens")
-async def get_tokens():
-    tokens = Token.objects.all()
-    return JSONResponse([token.to_dict() for token in tokens])
 
-@app.post("/tokens")
-async def add_token(request: Request):
-    data = await request.json()
-    new_token = Token(**data)
-    new_token.save()
-    return JSONResponse({"message": "Token added successfully"}, status_code=201)
-
-@app.get("/users")
-async def get_users():
-    users = User.objects.all()
-    return JSONResponse([user.to_dict() for user in users])
-
-@app.post("/users")
-async def add_user(request: Request):
-    data = await request.json()
-    new_user = User(**data)
-    new_user.save()
-    return JSONResponse({"message": "User added successfully"}, status_code=201)
+if __name__ == '__main__':
+    logger.info("Initializing Flask app")
+    try:
+        client = PumpPortalClient()  # Create an instance of PumpPortalClient
+        asyncio.run(client.subscribe_new_token())  # Use the method from the instance
+    except Exception as e:
+        logger.error(f"Error running the WebSocket client: {str(e)}", exc_info=True)
+    logger.info("Running Flask app with SocketIO")
+    socketio.init_app(app)
+    socketio.run(app, debug=True, host='0.0.0.0', port=8080, use_reloader=False, log_output=True)
