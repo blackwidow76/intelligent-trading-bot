@@ -308,7 +308,7 @@ async def process_data(data):
            # bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
             #mev_bot = MEVBot(solana_client, bitquery_client)
             #await mev_bot.execute_transaction(data)
-        elif data.get('txType') == 'create':
+            elif data.get('txType') == 'create':
             mint = data.get('mint')
             trader_public_key = data.get('traderPublicKey')
             initial_buy = data.get('initialBuy')
