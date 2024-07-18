@@ -22,3 +22,7 @@ class Token:
             "contract_address": self.contract_address,
             "creation_time": self.creation_time
         }
+
+class Trade():
+    # Define the fields for the Trade model here
+    pass

@@ -16,8 +16,6 @@ class SolanaTrader:
         # Implement wallet loading logic here
         pass
 
-    import requests
-    import json
 
     import requests
     import json

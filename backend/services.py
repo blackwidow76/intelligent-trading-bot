@@ -34,14 +34,14 @@ async def home():
 async def add_token(request: Request):
     data = await request.json()
     new_token = Token(**data)
-    new_token.save()
+    db.tokens.insert_one(new_token.dict())
     return JSONResponse({"message": "Token added successfully"}, status_code=201)
 
 @app.post("/add_user")
 async def add_user(request: Request):
     data = await request.json()
     new_user = User(**data)
-    new_user.save()
+    db.users.insert_one(new_user.dict())
     return JSONResponse({"message": "User added successfully"}, status_code=201)
 
 if __name__ == '__main__':

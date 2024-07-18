@@ -1,14 +1,15 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
 import json
 from datetime import datetime, date, timedelta
 import re
+import os
 
 import pandas as pd
 
 PACKAGE_ROOT = Path(__file__).parent.parent
 #PACKAGE_PARENT = '..'
-#SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__))))
+#SCRIPT_DIR = os.path.dirname(os.path.realpath(os.path.join(os.getcwd(), os.path.expanduser(__file__)))
 #sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 #PACKAGE_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -20,7 +21,7 @@ class App:
     loop = None  # asyncio main loop
     sched = None  # Scheduler
 
-    analyzer = None  # Store and analyze data
+    analyzer: Optional[Analyzer] = None  # Store and analyze data
 
     # Connector client
     client = None
@@ -41,14 +42,14 @@ class App:
     df = None  # Data from the latest analysis
 
     # Trade simulator
-    transaction = None
+    transaction = {}  # Initialize the transaction attribute as a dictionary
+
     # Trade binance
     status = None  # BOUGHT, SOLD, BUYING, SELLING
     order = None  # Latest or current order
     order_time = None  # Order submission time
 
     # Available assets for trade
-    # Can be set by the sync/recover function or updated by the trading algorithm
     base_quantity = "0.04108219"  # BTC owned (on account, already bought, available for trade)
     quote_quantity = "1000.0"  # USDT owned (on account, available for trade)
 
@@ -189,6 +190,20 @@ class App:
                 # "BTCUSDT", "ETHBTC", "ETHUSDT", "IOTAUSDT", "IOTABTC", "IOTAETH"
             }
         },
+
+        # ==================
+        # === SOLANA ===
+        "solana": {
+            "rpc_url": "https://api.mainnet-beta.solana.com",
+            "wallet_path": "path/to/solana/wallet.json",
+            "program_id": "YOUR_SOLANA_PROGRAM_ID",
+        },
+        "pumpportal": {
+            "api_url": "https://pumpportal.fun/api",
+            "websocket_url": "wss://pumpportal.fun/api/data",
+            "public_key": os.getenv("PUMPPORTAL_PUBLIC_KEY"),
+            "private_key": os.getenv("PUMPPORTAL_PRIVATE_KEY"),
+        },
     }
 
 
@@ -236,8 +251,8 @@ def load_last_transaction():
                 pass
         if line:
             t_dict = dict(zip("timestamp,price,profit,status".split(","), line.strip().split(",")))
-            t_dict["price"] = float(t_dict["price"])
-            t_dict["profit"] = float(t_dict["profit"])
+            t_dict["price"] = str(float(t_dict["price"]))
+            t_dict["profit"] = str(float(t_dict["profit"]))
             #t_dict = json.loads(line)
     else:  # Create file with header
         pass

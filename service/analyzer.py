@@ -66,7 +66,8 @@ class Analyzer:
         self.models = load_models(model_path, labels, algorithms)
 
         # Load latest transaction and (simulated) trade state
-        App.transaction = load_last_transaction()
+        app_instance = App()
+        app_instance.transaction = load_last_transaction()
 
     #
     # Data state operations
@@ -76,14 +77,15 @@ class Analyzer:
         return len(self.klines.get(symbol, []))
 
     def get_last_kline(self, symbol):
-        if self.get_klines_count(symbol) > 0:
-            return self.klines.get(symbol)[-1]
+        klines = self.klines.get(symbol)
+        if klines:
+            return klines[-1]
         else:
             return None
 
     def get_last_kline_ts(self, symbol):
         """Open time of the last kline. It is simultaneously kline id. Add 1m if the end is needed."""
-        last_kline = self.get_last_kline(symbol=symbol)
+        last_kline = self.get_last_kline(symbol)
         if not last_kline:
             return 0
         last_kline_ts = last_kline[0]
@@ -125,22 +127,22 @@ class Analyzer:
             klines_data = self.klines.get(symbol)
             if klines_data is None:
                 self.klines[symbol] = []
-                klines_data = self.klines.get(symbol)
+                klines_data = self.klines[symbol]
 
             ts = klines[0][0]  # Very first timestamp of the new data
 
-            # Find kline with this or younger timestamp in the database
-            # same_kline = next((x for x in klines_data if x[0] == ts), None)
-            existing_indexes = [i for i, x in enumerate(klines_data) if x[0] >= ts]
-            #print(f"===>>> Existing tss: {[x[0] for x in klines_data]}")
-            #print(f"===>>> New tss: {[x[0] for x in klines]}")
-            #print(f"===>>> {symbol} Overlap {len(existing_indexes)}. Existing Indexes: {existing_indexes}")
-            if existing_indexes:  # If there is overlap with new klines
-                start = min(existing_indexes)
-                num_deleted = len(klines_data) - start
-                del klines_data[start:]  # Delete starting from the first kline in new data (which will be added below)
-                if len(klines) < num_deleted:  # It is expected that we add same or more klines than deleted
-                    log.error("More klines is deleted by new klines added, than we actually add. Something woring with timestamps and storage logic.")
+            # Ensure klines_data is not None before using it
+            if klines_data:
+                existing_indexes = [i for i, x in enumerate(klines_data) if x[0] >= ts]
+                #print(f"===>>> Existing tss: {[x[0] for x in klines_data]}")
+                #print(f"===>>> New tss: {[x[0] for x in klines]}")
+                #print(f"===>>> {symbol} Overlap {len(existing_indexes)}. Existing Indexes: {existing_indexes}")
+                if existing_indexes:  # If there is overlap with new klines
+                    start = min(existing_indexes)
+                    num_deleted = len(klines_data) - start
+                    del klines_data[start:]  # Delete starting from the first kline in new data (which will be added below)
+                    if len(klines) < num_deleted:  # It is expected that we add same or more klines than deleted
+                        log.error("More klines is deleted by new klines added, than we actually add. Something woring with timestamps and storage logic.")
 
             # Append new klines
             klines_data.extend(klines)
@@ -152,12 +154,14 @@ class Analyzer:
                 del klines_data[:to_delete]
 
             # Check validity. It has to be an ordered time series with certain frequency
-            for i, kline in enumerate(self.klines.get(symbol)):
-                ts = kline[0]
-                if i > 0:
-                    if ts - prev_ts != interval_length_ms:
-                        log.error("Wrong sequence of klines. They are expected to be a regular time series with 1m frequency.")
-                prev_ts = kline[0]
+            klines_data = self.klines.get(symbol)
+            if klines_data:
+                for i, kline in enumerate(klines_data):
+                    ts = kline[0]
+                    if i > 0:
+                        if ts - prev_ts != interval_length_ms:
+                            log.error("Wrong sequence of klines. They are expected to be a regular time series with 1m frequency.")
+                    prev_ts = kline[0]
 
             # Debug message about the last received kline end and current ts (which must be less than 1m - rather small delay)
             log.debug(f"Stored klines. Total {len(klines_data)} in db. Last kline end: {self.get_last_kline_ts(symbol)+interval_length_ms}. Current time: {now_ts}")

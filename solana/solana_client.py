@@ -21,8 +21,6 @@ class SolanaClient:
 
     # Add more Solana-specific methods here
 
-    import requests
-    import json
 
     import requests
     import json

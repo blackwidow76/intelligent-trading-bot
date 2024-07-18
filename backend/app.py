@@ -43,8 +43,10 @@ async def add_token(request: Request):
     contract_address = form.get('contract_address')
     
     # Ensure MongoDB is initialized properly
-    if not db:
-        logger.error("MongoDB has not been initialized correctly.")
+    try:
+        client.server_info()  # Attempt to retrieve server information
+    except Exception as e:
+        logger.error(f"MongoDB connection failed: {e}")
         raise HTTPException(status_code=500, detail="MongoDB initialization failed")
 
     # Use the database object safely after initialization check

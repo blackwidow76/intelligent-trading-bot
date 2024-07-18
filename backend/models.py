@@ -1,5 +1,6 @@
 from pymongo import MongoClient
-from mongoengine import Document, StringField, IntField, FloatField, DateTimeField
+from pydantic import BaseModel
+from datetime import datetime
 import os
 
 from database.database import MONGODB_URI
@@ -7,20 +8,20 @@ from database.database import MONGODB_URI
 client = MongoClient(MONGODB_URI)
 db = client.get_default_database()
 
-class Token(Document):
-    name = StringField(required=True, max_length=80)
-    symbol = StringField(required=True, max_length=10)
-    launch_date = DateTimeField(required=True)
-    price = FloatField(required=True)
-    volume = FloatField()
-    contract_address = StringField(unique=True, required=True)
+class Token(BaseModel):
+    name: str
+    symbol: str
+    launch_date: datetime
+    price: float
+    volume: float = None
+    contract_address: str
 
-class Trade(Document):
-    token = StringField(required=True)
-    trade_time = DateTimeField(required=True)
-    amount = FloatField(required=True)
-    price = FloatField(required=True)
+class Trade(BaseModel):
+    token: str
+    trade_time: datetime
+    amount: float
+    price: float
 
-class User(Document):
-    username = StringField(unique=True, required=True)
-    email = StringField(unique=True, required=True)
+class User(BaseModel):
+    username: str
+    email: str

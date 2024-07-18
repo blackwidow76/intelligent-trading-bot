@@ -1,11 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-from service import App
-
 # Load environment variables from .env file
 load_dotenv()
-
 
 class Config:
     MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.6')  # Default value if not set

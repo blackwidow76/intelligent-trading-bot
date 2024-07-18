@@ -17,10 +17,15 @@ from service.notifier_diagram import *
 from service.collector_binance import main_collector_task, data_provider_health_check, sync_data_collector_task
 from service.trader_binance import main_trader_task, update_trade_status
 
+
 import logging
 
 log = logging.getLogger('server')
 
+# Initialize Solana trader
+solana_trader = SolanaTrader(App.config)
+
+# Initialize PumpPortal client
 
 #
 # Main procedure
@@ -63,6 +68,49 @@ async def main_task():
             await send_transaction_message(transaction)
     if trade_model.get("trader_binance"):
         trade_task = App.loop.create_task(main_trader_task())
+
+    # Solana trading logic
+    try:
+        solana_balance = await solana_trader.get_balance()
+        log.info(f"Current Solana balance: {solana_balance} SOL")
+
+        # Implement your Solana trading strategy here
+        # For example:
+        # if analyze_task.get('solana_signal') == 'buy':
+        #     await solana_trader.execute_trade('SOL/USDC', 'buy', 1)
+        # elif analyze_task.get('solana_signal') == 'sell':
+        #     await solana_trader.execute_trade('SOL/USDC', 'sell', 1)
+
+    except Exception as e:
+        log.error(f"Error in Solana trading: {e}")
+
+    # PumpPortal trading logic
+    try:
+        # Subscribe to new token events
+        async for new_token_event in pumpportal_client.subscribe_new_token():
+            log.info(f"New token created: {new_token_event}")
+            # Implement your logic for new token events here
+
+        # Subscribe to specific token trades
+        tokens_to_watch = ["TOKEN_ADDRESS_1", "TOKEN_ADDRESS_2"]  # Replace with actual token addresses
+        async for token_trade_event in pumpportal_client.subscribe_token_trade(tokens_to_watch):
+            log.info(f"Token trade event: {token_trade_event}")
+            # Implement your logic for token trade events here
+
+        # Example of executing a trade
+        trade_response = await pumpportal_client.trade(
+            action="buy",
+            mint="TOKEN_ADDRESS",  # Replace with actual token address
+            amount=100000,
+            denominated_in_sol=False,
+            slippage=10,
+            priority_fee=0.005,
+            pool="pump"
+        )
+        log.info(f"Trade response: {trade_response}")
+
+    except Exception as e:
+        log.error(f"Error in PumpPortal trading: {e}")
 
     return
 

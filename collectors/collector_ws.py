@@ -5,10 +5,16 @@ import asyncio
 import websockets
 import json
 import logging
+from typing import Optional  # Add this import if not already present
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
+
+# Add the grandparent directory to the Python path
+path_to_add = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+print(f"Adding path: {path_to_add}")  # Added print statement to debug path modification
+sys.path.insert(0, path_to_add)
 
 from service.App import App
 from service.analyzer import Analyzer
@@ -27,7 +33,7 @@ async def subscribe_to_streams(websocket, streams):
 # Call the function within an async context
 async def main():   
     uri = "wss://pumpportal.fun/api/data"  # Replace with actual URI
-    async with websockets.connect(uri) as websocket:  # Use websockets.connect
+    async with websockets.connect(uri) as websocket:  # Correct usage of websockets.connect
         await subscribe_to_streams(websocket, ["stream1", "stream2"])  # Example streams
         async for message in websocket:
             data = json.loads(message)
@@ -77,7 +83,7 @@ def start_collector_ws():
     #
     # Initialize data state, connections and listeners
     #
-    App.analyzer = Analyzer(None)
+    App.analyzer = Analyzer(None)  # This should now be compatible with the type hint
 
     #
     # Register websocket listener
@@ -104,7 +110,7 @@ def start_collector_ws():
 
     async def main():
         uri = "wss://pumpportal.fun/api/data"  # Replace with actual URI
-        async with websockets.connect(uri) as websocket:  # Use websockets.connect
+        async with websockets.connect(uri) as websocket:  # Correct usage of websockets.connect
             await subscribe_to_streams(websocket, streams)
             async for message in websocket:
                 data = json.loads(message)
