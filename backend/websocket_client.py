@@ -308,7 +308,17 @@ async def process_data(data):
             bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
             mev_bot = MEVBot(solana_client, bitquery_client)
             await mev_bot.execute_transaction(data)
-    elif data.get('txType') == 'create':
+except websockets.ConnectionClosedError:
+    logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
+    await asyncio.sleep(5)
+except websockets.ConnectionClosedOK:
+    logger.error("Connection to Pump.fun WebSocket closed normally. Reconnecting...")
+    await asyncio.sleep(5)
+except Exception as e:
+    logger.error(f"Error in Pump.fun WebSocket client: {str(e)}", exc_info=True)
+    await asyncio.sleep(5)
+finally:
+    if data.get('txType') == 'create':
             mint = data.get('mint')
             trader_public_key = data.get('traderPublicKey')
             initial_buy = data.get('initialBuy')
