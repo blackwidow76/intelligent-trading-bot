@@ -1,12 +1,11 @@
 from pymongo import MongoClient
+from mongoengine import Document, StringField, IntField, FloatField, DateTimeField
 import os
 
 from database.database import MONGODB_URI
 
 client = MongoClient(MONGODB_URI)
 db = client.get_default_database()
-
-from mongoengine import Document, StringField, IntField, FloatField, DateTimeField
 
 class Token(Document):
     name = StringField(required=True, max_length=80)
