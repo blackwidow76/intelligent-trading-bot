@@ -300,14 +300,14 @@ async def process_data(data):
         elif data.get('event') == 'trade':
             await store_trade_data(data)
         elif data.get('event') == 'mevBotTransaction':
-            #from backend.mev_bot import MEVBot
-           # from solana.rpc.api import Client as SolanaClient
-            #from bitquery import BitqueryClient  # Corrected import
+            from backend.mev_bot import MEVBot
+            from solana.rpc.api import Client as SolanaClient
+            from bitquery import BitqueryClient  # Corrected import
 
-            #solana_client = SolanaClient("https://api.mainnet-beta.solana.com")  # Provide the Solana RPC URL
-           # bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
-            #mev_bot = MEVBot(solana_client, bitquery_client)
-            #await mev_bot.execute_transaction(data)
+            solana_client = SolanaClient("https://api.mainnet-beta.solana.com")  # Provide the Solana RPC URL
+            bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
+            mev_bot = MEVBot(solana_client, bitquery_client)
+            await mev_bot.execute_transaction(data)
         elif data.get('txType') == 'create':
             mint = data.get('mint')
             trader_public_key = data.get('traderPublicKey')
