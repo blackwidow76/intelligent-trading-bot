@@ -2,9 +2,8 @@ import asyncio
 import websockets
 import json
 import logging
-from flask_socketio import SocketIO
-from backend.config import Config
-from flask_pymongo import PyMongo
+from fastapi import FastAPI
+from motor.motor_asyncio import AsyncIOMotorClient
 from database.models import Token, Trade
 import aiohttp
 from pymongo import MongoClient
