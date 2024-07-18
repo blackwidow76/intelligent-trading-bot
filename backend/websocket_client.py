@@ -308,15 +308,15 @@ async def process_data(data):
            # bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
             #mev_bot = MEVBot(solana_client, bitquery_client)
             #await mev_bot.execute_transaction(data)
-        elif data.get('txType') == 'create':
-            mint = data.get('mint')
-            trader_public_key = data.get('traderPublicKey')
-            initial_buy = data.get('initialBuy')
-            bonding_curve_key = data.get('bondingCurveKey')
-            v_tokens_in_bonding_curve = data.get('vTokensInBondingCurve')
-            v_sol_in_bonding_curve = data.get('vSolInBondingCurve')
-            market_cap_sol = data.get('marketCapSol')
-            logger.info(f"New token mint data: {mint}, {trader_public_key}, {initial_buy}, {bonding_curve_key}, {v_tokens_in_bonding_curve}, {v_sol_in_bonding_curve}, {market_cap_sol}")
+            elif data.get('txType') == 'create':
+                mint = data.get('mint')
+                trader_public_key = data.get('traderPublicKey')
+                initial_buy = data.get('initialBuy')
+                bonding_curve_key = data.get('bondingCurveKey')
+                v_tokens_in_bonding_curve = data.get('vTokensInBondingCurve')
+                v_sol_in_bonding_curve = data.get('vSolInBondingCurve')
+                market_cap_sol = data.get('marketCapSol')
+                logger.info(f"New token mint data: {mint}, {trader_public_key}, {initial_buy}, {bonding_curve_key}, {v_tokens_in_bonding_curve}, {v_sol_in_bonding_curve}, {market_cap_sol}")
     except websockets.ConnectionClosedError:
         logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
         await asyncio.sleep(5)
