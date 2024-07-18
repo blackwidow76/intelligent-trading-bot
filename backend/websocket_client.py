@@ -55,12 +55,15 @@ class PumpPortalClient:
             token_document = {
                 "contract_address": event["event"]["contractAddress"],
                 "creation_time": event["event"]["timestamp"],
-                # Add other token fields here
+                "token_id": event["event"]["tokenId"],
+                "owner": event["event"]["owner"],
+                "metadata": metadata,
+                "event_type": event["event"]["type"]
             }
-            tokens_collection.insert_one(token_document)
+            await tokens_collection.insert_one(token_document)
             # Further processing and inserting related data
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.error(f"An error occurred while storing token data: {e}")
 
     async def subscribe_account_trade(self, accounts):
         await pump_fun_client(self.websocket_url, "subscribeAccountTrade", process_data, keys=accounts)
@@ -87,9 +90,13 @@ class PumpPortalClient:
 
     async def store_data(self, data):
         # Assuming 'data' collection exists in the database
-        db.data.insert_one(data)
+        try:
+            await db.data.insert_one(data)
+        except Exception as e:
+            logger.error(f"An error occurred while storing data: {e}")
 
-class PumpPortalClient:
+# Rename the second PumpPortalClient class to a different name
+class PumpPortalClientV2:
     def __init__(self):
         load_dotenv()  # Load environment variables from .env file
         self.api_url = App.config["pumpportal"]["api_url"]
@@ -121,12 +128,18 @@ class PumpPortalClient:
             token_document = {
                 "contract_address": event["event"]["contractAddress"],
                 "creation_time": event["event"]["timestamp"],
-                # Add other token fields here
+                "token_name": event["event"].get("tokenName"),
+                "token_symbol": event["event"].get("tokenSymbol"),
+                "decimals": event["event"].get("decimals"),
+                "total_supply": event["event"].get("totalSupply"),
+                "owner": event["event"].get("owner"),
+                "block_number": event["event"].get("blockNumber"),
+                "transaction_hash": event["event"].get("transactionHash")
             }
-            tokens_collection.insert_one(token_document)
+            await tokens_collection.insert_one(token_document)
             # Further processing and inserting related data
         except Exception as e:
-            print(f"An error occurred: {e}")
+            logger.error(f"An error occurred while storing token data: {e}")
 
     async def subscribe_account_trade(self, accounts):
         await pump_fun_client(self.websocket_url, "subscribeAccountTrade", process_data, keys=accounts)
@@ -150,12 +163,23 @@ class PumpPortalClient:
 
     async def process_data(self, data):
         # Deferred import to avoid circular dependency
-        from backend.mev_bot import MEVBot
-        from solana.rpc.api import Client as SolanaClient
-        from bitquery import BitqueryClient  # Corrected import
+        try:
+            from backend.mev_bot import MEVBot
+            from solana.rpc.api import Client as SolanaClient
+            from bitquery.client import BitqueryClient  # Corrected import path
+        except ImportError as e:
+            logger.error(f"Import error: {e}")
+            raise
 
-        solana_client = SolanaClient("https://api.mainnet-beta.solana.com")  # Provide the Solana RPC URL
-        bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
+        solana_rpc_url = "https://api.mainnet-beta.solana.com"
+        bitquery_api_key = os.getenv("BITQUERY_API_KEY")
+
+        if not bitquery_api_key:
+            logger.error("BITQUERY_API_KEY environment variable not set")
+            raise EnvironmentError("BITQUERY_API_KEY environment variable not set")
+
+        solana_client = SolanaClient(solana_rpc_url)  # Provide the Solana RPC URL
+        bitquery_client = BitqueryClient(api_key=bitquery_api_key)  # Initialize Bitquery client with API key
         mev_bot = MEVBot(solana_client, bitquery_client)
         await mev_bot.execute_transaction(data)
 
@@ -212,20 +236,32 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
 
 async def store_new_token_mint_data(data):
     logger.debug(f"Storing new token mint data: {data}")
-    from backend.app import app  # Import the app instance
-    new_token = Token(contract_address=data.get('contract_address'))  # Provide required argument
+    from backend.app import mongo  # Import the mongo instance
+    from backend.models import Token  # Import the Token model
+
+    # Create a new token instance with all required fields
+    new_token = Token(
+        contract_address=data.get('contract_address'),
+        name=data.get('name', 'N/A'),
+        symbol=data.get('symbol', 'N/A'),
+        launch_date=data.get('launch_date', 'N/A'),
+        price=data.get('price', 0)
+    )
+
     if not new_token.contract_address:
         logger.error("Missing 'contract_address' key in data")
         return
-    await db.tokens.insert_one(new_token.to_dict())
 
-from backend.app import mongo  # Import mongo instance
+    # Insert the new token into the database
+    await client.db.tokens.insert_one(new_token.to_dict())
+
+from backend.app import client  # Import mongo instance
 from backend.models import Trade, Token  # Import necessary models
 
 async def fetch_and_store_token_metadata(contract_address):
     logger.debug(f"Fetching and storing token metadata for contract: {contract_address}")
     metadata = await (contract_address)
-    token = mongo.db.tokens.find_one({"contract_address": contract_address})
+    token = client.db.tokens.find_one({"contract_address": contract_address})
     if token:
         update_data = {
             'name': metadata.get('name', 'N/A'),
@@ -234,7 +270,7 @@ async def fetch_and_store_token_metadata(contract_address):
             'price': metadata.get('price', 0),
             'volume': metadata.get('volume', 0)
         }
-        mongo.db.tokens.update_one({'_id': token['_id']}, {'$set': update_data})
+        client.db.tokens.update_one({'_id': token['_id']}, {'$set': update_data})
     else:
         new_token = Token(
             name=metadata.get('name', 'N/A'),
@@ -244,7 +280,7 @@ async def fetch_and_store_token_metadata(contract_address):
             volume=metadata.get('volume', 0),
             contract_address=contract_address
         )
-        mongo.db.tokens.insert_one(new_token.to_dict())
+        client.db.tokens.insert_one(new_token.to_dict())
 
 async def store_trade_data(data):
     logger.debug(f"Storing trade data: {data}")
@@ -254,7 +290,7 @@ async def store_trade_data(data):
         amount=data['amount'],
         price=data['price']
     )
-    mongo.db.trades.insert_one(new_trade.to_dict())
+    client.db.trades.insert_one(new_trade.to_dict())
 
 async def process_data(data):
     logger.debug(f"Processing data: {data}")
