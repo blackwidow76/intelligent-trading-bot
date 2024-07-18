@@ -327,6 +327,15 @@ finally:
         v_sol_in_bonding_curve = data.get('vSolInBondingCurve')
         market_cap_sol = data.get('marketCapSol')
         logger.info(f"New token mint data: {mint}, {trader_public_key}, {initial_buy}, {bonding_curve_key}, {v_tokens_in_bonding_curve}, {v_sol_in_bonding_curve}, {market_cap_sol}")
+    except websockets.ConnectionClosedError:
+        logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
+        await asyncio.sleep(5)
+    except websockets.ConnectionClosedOK:
+        logger.error("Connection to Pump.fun WebSocket closed normally. Reconnecting...")
+        await asyncio.sleep(5)
+    except Exception as e:
+        logger.error(f"Error in Pump.fun WebSocket client: {str(e)}", exc_info=True)
+        await asyncio.sleep(5)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
