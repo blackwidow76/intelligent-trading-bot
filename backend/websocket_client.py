@@ -16,17 +16,13 @@ import requests
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-socketio = SocketIO()
+app = FastAPI()
 
 import os
-import sys
 
-# Add the parent directory to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-MONGODB_URI = App.config.get("MONGODB_URI", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.6")
-client = MongoClient(MONGODB_URI)
-db = client.get_database('pumpportal')  # Replace 'your_database_name' with the actual database name
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.6")
+client = AsyncIOMotorClient(MONGODB_URI)
+db = client.pumpportal  # Replace 'your_database_name' with the actual database name
 
 class PumpPortalClient:
     def __init__(self):
@@ -218,13 +214,11 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
 async def store_new_token_mint_data(data):
     logger.debug(f"Storing new token mint data: {data}")
     from backend.app import app  # Import the app instance
-    with app.app_context():  # Push the application context
-        new_token = Token(contract_address=data.get('contract_address'))  # Provide required argument
-        if not new_token.contract_address:
-            logger.error("Missing 'contract_address' key in data")
-            return
-        db.session.add(new_token)
-        db.session.commit()
+    new_token = Token(contract_address=data.get('contract_address'))  # Provide required argument
+    if not new_token.contract_address:
+        logger.error("Missing 'contract_address' key in data")
+        return
+    await db.tokens.insert_one(new_token.to_dict())
 
 from backend.app import mongo  # Import mongo instance
 from backend.models import Trade, Token  # Import necessary models
