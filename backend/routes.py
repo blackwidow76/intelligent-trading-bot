@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 from models import Token, User
-from websocket_client import pump_fun_client
+from websocket_client import pump_fun_client, PumpPortalClient
 import logging
 import asyncio
 
