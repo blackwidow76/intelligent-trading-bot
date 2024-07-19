@@ -235,6 +235,9 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
                         logger.warning("WebSocket connection timed out. Sending keep-alive ping.")
                         await websocket.send(json.dumps({"type": "ping"}))
                         last_heartbeat = asyncio.get_event_loop().time()
+                    except Exception as e:
+                        logger.error(f"Error receiving data from Pump.fun WebSocket: {str(e)}", exc_info=True)
+                        await asyncio.sleep(retry_interval)
         except websockets.exceptions.ConnectionClosedError as e:  # Corrected exception
             logger.error(f"Connection to Pump.fun WebSocket closed with error: {e}. Reconnecting in {retry_interval} seconds...")
             await asyncio.sleep(retry_interval)
