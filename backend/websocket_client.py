@@ -65,6 +65,9 @@ class PumpPortalClient:
         except Exception as e:
             logger.error(f"An error occurred while storing token data: {e}")
 
+        # Further processing and inserting related data
+        await store_trade_data(event)
+
     async def subscribe_account_trade(self, accounts):
         await pump_fun_client(self.websocket_url, "subscribeAccountTrade", process_data, keys=accounts)
 
@@ -105,6 +108,9 @@ class PumpPortalClient:
         bitquery_client = BitqueryClient(api_key=bitquery_api_key)  # Initialize Bitquery client with API key
         mev_bot = MEVBot(solana_client, bitquery_client)
         await mev_bot.execute_transaction(data)
+
+        # Further processing and inserting related data
+        await pump_fun_client("wss://pumpportal.fun/api/data", "subscribeNewToken", process_data)
 
 # Rename the second PumpPortalClient class to a different name
 class PumpPortalClientV2:
