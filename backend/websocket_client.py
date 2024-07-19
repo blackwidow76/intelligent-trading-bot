@@ -266,6 +266,9 @@ async def store_new_token_mint_data(data):
     # Insert the new token into the database
     await client.db.tokens.insert_one(new_token.to_dict())
 
+    # Further processing and inserting related data
+    await fetch_and_store_token_metadata(new_token.contract_address)
+
 from backend.app import client  # Import mongo instance
 from backend.models import Trade, Token  # Import necessary models
 
@@ -293,6 +296,9 @@ async def fetch_and_store_token_metadata(contract_address):
         )
         client.db.tokens.insert_one(new_token.to_dict())
 
+    # Further processing and inserting related data
+    await store_token_data(metadata)
+
 async def store_trade_data(data):
     logger.debug(f"Storing trade data: {data}")
     new_trade = Trade(
@@ -302,6 +308,9 @@ async def store_trade_data(data):
         price=data['price']
     )
     client.db.trades.insert_one(new_trade.to_dict())
+
+    # Further processing and inserting related data
+    await process_data(data)
 
 async def process_data(data):
     logger.debug(f"Processing data: {data}")
