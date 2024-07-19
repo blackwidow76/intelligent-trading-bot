@@ -236,7 +236,7 @@ async def pump_fun_client(uri, method, process_data_func, keys=None):
 
 async def store_new_token_mint_data(data):
     logger.debug(f"Storing new token mint data: {data}")
-    from backend.app import mongo  # Import the mongo instance
+    from backend.app import client  # Import the mongo instance
     from backend.models import Token  # Import the Token model
 
     # Create a new token instance with all required fields
@@ -327,15 +327,6 @@ finally:
         v_sol_in_bonding_curve = data.get('vSolInBondingCurve')
         market_cap_sol = data.get('marketCapSol')
         logger.info(f"New token mint data: {mint}, {trader_public_key}, {initial_buy}, {bonding_curve_key}, {v_tokens_in_bonding_curve}, {v_sol_in_bonding_curve}, {market_cap_sol}")
-    except websockets.ConnectionClosedError:
-        logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
-        await asyncio.sleep(5)
-    except websockets.ConnectionClosedOK:
-        logger.error("Connection to Pump.fun WebSocket closed normally. Reconnecting...")
-        await asyncio.sleep(5)
-    except Exception as e:
-        logger.error(f"Error in Pump.fun WebSocket client: {str(e)}", exc_info=True)
-        await asyncio.sleep(5)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
