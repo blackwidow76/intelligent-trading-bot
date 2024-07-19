@@ -64,3 +64,8 @@ if __name__ == '__main__':
     # Trigger the data stream
     from backend.services import start_data_stream
     start_data_stream()
+
+    # Add WebSocket client initialization
+    from backend.websocket_client import PumpPortalClient
+    pump_portal_client = PumpPortalClient()
+    asyncio.run(pump_portal_client.subscribe_new_token())
