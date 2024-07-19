@@ -2,7 +2,7 @@ import os
 import sys
 import argparse
 import asyncio
-import websockets
+import websockets  # Ensure you have the latest version of websockets installed
 import json
 import logging
 from typing import Optional  # Add this import if not already present
