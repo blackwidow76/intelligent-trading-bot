@@ -85,15 +85,26 @@ class PumpPortalClient:
         response = requests.post(f"{self.api_url}/trade-local", data=data)
         return response.content
     async def process_data(self, data):
-        # Store the received data
-        await self.store_data(data)
-
-    async def store_data(self, data):
-        # Assuming 'data' collection exists in the database
+        # Deferred import to avoid circular dependency
         try:
-            await db.data.insert_one(data)
-        except Exception as e:
-            logger.error(f"An error occurred while storing data: {e}")
+            from backend.mev_bot import MEVBot
+            from solana.rpc.api import Client as SolanaClient
+            from bitquery.client import BitqueryClient  # Corrected import path
+        except ImportError as e:
+            logger.error(f"Import error: {e}")
+            raise
+
+        solana_rpc_url = "https://api.mainnet-beta.solana.com"
+        bitquery_api_key = os.getenv("BITQUERY_API_KEY")
+
+        if not bitquery_api_key:
+            logger.error("BITQUERY_API_KEY environment variable not set")
+            raise EnvironmentError("BITQUERY_API_KEY environment variable not set")
+
+        solana_client = SolanaClient(solana_rpc_url)  # Provide the Solana RPC URL
+        bitquery_client = BitqueryClient(api_key=bitquery_api_key)  # Initialize Bitquery client with API key
+        mev_bot = MEVBot(solana_client, bitquery_client)
+        await mev_bot.execute_transaction(data)
 
 # Rename the second PumpPortalClient class to a different name
 class PumpPortalClientV2:
@@ -308,6 +319,7 @@ async def process_data(data):
             bitquery_client = BitqueryClient(api_key=os.getenv("BITQUERY_API_KEY"))  # Initialize Bitquery client with API key
             mev_bot = MEVBot(solana_client, bitquery_client)
             await mev_bot.execute_transaction(data)
+
 except websockets.ConnectionClosedError:
     logger.error("Connection to Pump.fun WebSocket closed. Reconnecting...")
     await asyncio.sleep(5)
