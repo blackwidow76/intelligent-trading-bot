@@ -60,3 +60,7 @@ if __name__ == '__main__':
     import uvicorn
     logger.info("Initializing FastAPI app")
     uvicorn.run(app, host="0.0.0.0", port=8080)
+    
+    # Trigger the data stream
+    from backend.services import start_data_stream
+    start_data_stream()
