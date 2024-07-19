@@ -47,7 +47,7 @@ async def main():
 #   - continuation of connection (confirmation responses) - chect if it is done automatically by the client
 
 
-def process_message(msg):
+async def process_data(msg):
     if msg is None:
         log.error("Empty message received")
         return
@@ -67,8 +67,8 @@ def process_message(msg):
 
     log.info(f"Event received: {event}")
 
-    # Store the received data
-    store_data(event)
+    # Store the received data using Bitquery API
+    await store_data_with_bitquery(event)
 
 from database.database import db
 
