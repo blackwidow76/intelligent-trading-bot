@@ -58,6 +58,7 @@ async def add_token(request: Request):
 
 if __name__ == '__main__':
     import uvicorn
+    import asyncio  # Import asyncio here to fix the undefined name error
     logger.info("Initializing FastAPI app")
     uvicorn.run(app, host="0.0.0.0", port=8080)
     
