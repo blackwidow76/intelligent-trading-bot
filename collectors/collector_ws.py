@@ -68,7 +68,7 @@ async def process_data(msg):
     log.info(f"Event received: {event}")
 
     # Store the received data using Bitquery API
-    await store_data_with_bitquery(event)
+    await store_data(event)
 
 from database.database import db
 
@@ -114,7 +114,7 @@ def start_collector_ws():
             await subscribe_to_streams(websocket, streams)
             async for message in websocket:
                 data = json.loads(message)
-                process_message(data)
+                await process_data(data)
 
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
